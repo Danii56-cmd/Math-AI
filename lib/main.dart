@@ -4,6 +4,7 @@ import 'package:math_ai/core/theme.dart';
 import 'package:math_ai/provider/aichat_provider.dart';
 import 'package:math_ai/provider/course_provider.dart';
 import 'package:math_ai/provider/history_provider.dart';
+import 'package:math_ai/provider/homescreen_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/view/Aichatbotbotscreen/Aichatbot_screen.dart';
 import 'package:math_ai/view/probleminput_screen.dart/calculator_screen.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AiChatProvider()),
         ChangeNotifierProvider(create: (_) => CourseProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690),

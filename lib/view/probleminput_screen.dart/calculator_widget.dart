@@ -308,7 +308,7 @@ class _KeyGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 6,
       crossAxisSpacing: 6,
-      childAspectRatio: 1.15,
+      childAspectRatio: 0.9,
       children: children,
     );
   }
@@ -348,7 +348,7 @@ class _CalcButton extends StatelessWidget {
       bg = c.primary.withOpacity(0.15);
       fg = c.primary;
     } else if (isFunction || isSpecial) {
-      bg = c.surfaceVariant;
+      bg = c.iconBgMuted;
       fg = c.subtitle;
     } else {
       // number

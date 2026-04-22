@@ -1,10 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
+import 'package:math_ai/provider/homescreen_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/view/home/container_slider.dart';
 import 'package:math_ai/view/home/homescreenwidgets/customgridviewcontainer.dart';
@@ -13,19 +13,12 @@ import 'package:math_ai/view/home/homescreenwidgets/recentactivityListview.dart'
 import 'package:math_ai/view/scanner/camera_screen.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedTabIndex = 0;
-
-  @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context); // ← single line replaces everything
+    final c = AppColors.of(context);
 
     final List recentActivity = [
       {
@@ -46,11 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: c.card,
         elevation: 0.7,
         shadowColor: c.subtitle,
-        leading: Icon(Icons.menu, color: c.title),
+        leading: Icon(Icons.menu, color: c.primary),
         title: Text(
           "Math Ai",
           style: TextStyle(
-            color: AppConstants.primaryColor,
+            color: c.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -72,23 +65,31 @@ class _HomeScreenState extends State<HomeScreen> {
               // ── Search Bar ───────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: TextField(
-                  style: TextStyle(color: c.title),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: c.card,
-                    prefixIcon: Icon(Icons.search, color: c.subtitle),
-                    hintText: "Search math problems...",
-                    hintStyle: TextStyle(color: c.subtitle),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(color: c.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(color: c.primary.withOpacity(0.5)),
-                    ),
-                  ),
+                child: Consumer<HomeProvider>(
+                  builder: (context, provider, child) {
+                    return TextField(
+                      style: TextStyle(color: c.title),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: c.card,
+                        prefixIcon: Icon(Icons.search, color: c.subtitle),
+                        hintText: "Search math problems...",
+                        hintStyle: TextStyle(color: c.subtitle),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: c.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(
+                            color: c.primary.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
+                      onChanged: (value) =>
+                          context.read<HomeProvider>().updateSearch(value),
+                    );
+                  },
                 ),
               ),
 
@@ -101,16 +102,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: SizedBox(
                   height: 50,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return CustomTabBar(
-                        selectedIndex: _selectedTabIndex,
-                        onTabChanged: (index) {
-                          setState(() {
-                            _selectedTabIndex = index;
-                          });
+                  child: Consumer<HomeProvider>(
+                    builder: (context, provider, child) {
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder: (context, index) {
+                          return CustomTabBar(
+                            selectedIndex: provider.selectedTabIndex,
+                            onTabChanged: (index) =>
+                                context.read<HomeProvider>().changeTab(index),
+                          );
                         },
                       );
                     },
@@ -243,15 +245,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 2,
-                  itemBuilder: (context, index) {
-                    return RecentActivityListview(
-                      icon: recentActivity[index]["icon"],
-                      title: recentActivity[index]["title"],
-                      subtitle: recentActivity[index]["subtitle"],
+                child: Consumer<HomeProvider>(
+                  builder: (context, provider, child) {
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 2,
+                      itemBuilder: (context, index) {
+                        return RecentActivityListview(
+                          icon: recentActivity[index]["icon"],
+                          title: recentActivity[index]["title"],
+                          subtitle: recentActivity[index]["subtitle"],
+                        );
+                      },
                     );
                   },
                 ),

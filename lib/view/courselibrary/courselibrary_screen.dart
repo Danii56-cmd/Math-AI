@@ -100,6 +100,7 @@ class CourseLibraryScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      onChanged: (value) => courseProvider.updateSearch(value),
                     );
                   },
                 ),

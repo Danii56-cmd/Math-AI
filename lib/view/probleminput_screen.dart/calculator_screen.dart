@@ -25,7 +25,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final c = AppColors.of(context);
     // final themeProvider = Provider.of<ThemeChangerProvider>(context);
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 247, 249, 251),
+      // backgroundColor: Color.fromARGB(255, 247, 249, 251),
       appBar: AppBar(
         backgroundColor: c.card,
         shadowColor: c.subtitle,
@@ -79,7 +79,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
-                    color: c.title,
+                    color: c.subtitle,
                   ),
                 ),
                 SizedBox(height: 10.h),
