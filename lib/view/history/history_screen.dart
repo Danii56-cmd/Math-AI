@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
+import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -50,46 +51,47 @@ class HistoryScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 20.h),
-                _buildSearchBar(context, c),
-                SizedBox(height: 20.h),
-                _buildFilterChips(context, c),
-                SizedBox(height: 30.h),
-                _sectionHeader("TODAY", context, c),
-                HistoryItemCard(
-                  time: "14:22 PM",
-                  tag: "ALGEBRA",
-                  problem: "3x² + 12x - 9 = 0",
-                  solution: "x = -2 ± √7",
-                  isFinal: true,
-                ),
-                HistoryItemCard(
-                  time: "09:15 AM",
-                  tag: "CALCULUS",
-                  problem: "∫ (sin x + cos x) dx",
-                  solution: "sin x - cos x + C",
-                  isFinal: true,
-                ),
-                _sectionHeader("YESTERDAY", context, c),
-                HistoryItemCard(
-                  time: "16:45 PM",
-                  tag: "GEOMETRY",
-                  problem: "Area of Triangle ABC",
-                  solution: "42.5 cm²",
-                  isFinal: false,
-                ),
-                HistoryItemCard(
-                  time: "11:20 AM",
-                  tag: "ALGEBRA",
-                  problem: "log₂(x + 1) = 3",
-                  solution: "x = 7",
-                  isFinal: false,
-                ),
-                SizedBox(height: 20.h),
-              ],
+            child: Consumer<HistoryProvider>(
+              builder: (context, provider, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20.h),
+
+                    _buildSearchBar(context, c),
+                    SizedBox(height: 20.h),
+
+                    _buildFilterChips(context, c),
+                    SizedBox(height: 30.h),
+
+                    // 🔥 TODAY FROM PROVIDER
+                    _sectionHeader("TODAY", context, c),
+                    ...provider.todayItems.map((item) {
+                      return HistoryItemCard(
+                        time: item["time"],
+                        tag: item["tag"],
+                        problem: item["problem"],
+                        solution: item["solution"],
+                        isFinal: item["isFinal"],
+                      );
+                    }),
+
+                    // 🔥 YESTERDAY FROM PROVIDER
+                    _sectionHeader("YESTERDAY", context, c),
+                    ...provider.yesterdayItems.map((item) {
+                      return HistoryItemCard(
+                        time: item["time"],
+                        tag: item["tag"],
+                        problem: item["problem"],
+                        solution: item["solution"],
+                        isFinal: item["isFinal"],
+                      );
+                    }),
+
+                    SizedBox(height: 20.h),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -99,58 +101,88 @@ class HistoryScreen extends StatelessWidget {
 
   // ================= SEARCH BAR =================
   Widget _buildSearchBar(BuildContext context, AppColors c) {
-    return TextField(
-      style: TextStyle(color: c.title),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: c.card,
-        prefixIcon: Icon(Icons.search, color: c.subtitle),
-        hintText: "Search past solutions...",
-        hintStyle: TextStyle(color: c.subtitle),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: c.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: c.primary.withOpacity(0.3)),
-        ),
-      ),
+    return Consumer<HistoryProvider>(
+      builder: (context, provider, child) {
+        return TextField(
+          onChanged: provider.updateSearch,
+          style: TextStyle(color: c.title),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: c.card,
+            prefixIcon: Icon(Icons.search, color: c.subtitle),
+            hintText: "Search past solutions...",
+            hintStyle: TextStyle(color: c.subtitle),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(color: c.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(color: c.primary.withOpacity(0.3)),
+            ),
+          ),
+        );
+      },
     );
   }
 
   // ================= FILTER CHIPS =================
   Widget _buildFilterChips(BuildContext context, AppColors c) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _filterChip(c, "All History", isSelected: true),
-          _filterChip(c, "Algebra"),
-          _filterChip(c, "Calculus"),
-          _filterChip(c, "Geometry"),
-          _filterChip(c, "Trigonometry"),
-          _filterChip(c, "Statistics"),
-        ],
-      ),
+    return Consumer<HistoryProvider>(
+      builder: (context, provider, child) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _filterChip(
+                c,
+                "All History",
+                isSelected: provider.selectedFilter == "All History",
+                onTap: () => provider.changeFilter("All History"),
+              ),
+              _filterChip(
+                c,
+                "Algebra",
+                isSelected: provider.selectedFilter == "Algebra",
+                onTap: () => provider.changeFilter("Algebra"),
+              ),
+              _filterChip(
+                c,
+                "Calculus",
+                isSelected: provider.selectedFilter == "Calculus",
+                onTap: () => provider.changeFilter("Calculus"),
+              ),
+              _filterChip(
+                c,
+                "Geometry",
+                isSelected: provider.selectedFilter == "Geometry",
+                onTap: () => provider.changeFilter("Geometry"),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _filterChip(AppColors c, String label, {bool isSelected = false}) {
-    return Container(
-      margin: EdgeInsets.only(right: 10.w),
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 7.h),
-      decoration: BoxDecoration(
-        color: isSelected ? c.primary : c.card,
-        borderRadius: BorderRadius.circular(30.r),
-        border: Border.all(color: isSelected ? Colors.transparent : c.border),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? Colors.white : c.subtitle,
-          fontWeight: FontWeight.bold,
-          fontSize: 13.sp,
+  Widget _filterChip(
+    AppColors c,
+    String label, {
+    bool isSelected = false,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(right: 10.w),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          color: isSelected ? c.primary : c.card,
+          borderRadius: BorderRadius.circular(30.r),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(color: isSelected ? Colors.white : c.subtitle),
         ),
       ),
     );

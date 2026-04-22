@@ -9,11 +9,11 @@ import 'package:provider/provider.dart';
 class CourseLibraryScreen extends StatelessWidget {
   CourseLibraryScreen({super.key});
 
-  // final List<String> topics = [
-  //   "Completing the square",
-  //   "Parabola Graphing",
-  //   "Factoring Polynomials",
-  // ];
+  final List<String> topics = [
+    "Completing the square",
+    "Parabola Graphing",
+    "Factoring Polynomials",
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -89,12 +89,14 @@ class CourseLibraryScreen extends StatelessWidget {
                         hintStyle: TextStyle(color: c.subtitle),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30.r),
-                          borderSide: BorderSide(color: Colors.transparent),
+                          borderSide: BorderSide(
+                            color: c.subtitle.withAlpha(5),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30.r),
                           borderSide: BorderSide(
-                            color: c.subtitle.withAlpha(5),
+                            color: c.subtitle.withAlpha(30),
                           ),
                         ),
                       ),
@@ -106,7 +108,43 @@ class CourseLibraryScreen extends StatelessWidget {
                   builder: (context, provider, child) {
                     return GestureDetector(
                       onTap: () {
-                        provider.changeFilter("Algebra"); // example
+                        showModalBottomSheet(
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20.r),
+                            ),
+                          ),
+                          builder: (context) {
+                            final filters = [
+                              "All Topics",
+                              "Algebra",
+                              "Geometry",
+                              "Calculus",
+                              "Statistics",
+                              "Trigonometry",
+                            ];
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: filters.length,
+                              itemBuilder: (context, index) {
+                                final item = filters[index];
+
+                                return ListTile(
+                                  title: Text(item),
+                                  trailing: provider.selectedFilter == item
+                                      ? Icon(Icons.check, color: c.primary)
+                                      : null,
+                                  onTap: () {
+                                    provider.changeFilter(item);
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        );
                       },
                       child: Container(
                         height: 50.h,
@@ -115,13 +153,14 @@ class CourseLibraryScreen extends StatelessWidget {
                           color: c.surfaceVariant,
                           borderRadius: BorderRadius.circular(30.r),
                         ),
+
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.filter_list, color: c.subtitle),
                             SizedBox(width: 05.w),
                             Text(
-                              "All Topics",
+                              provider.selectedFilter,
                               style: TextStyle(color: c.subtitle),
                             ),
                           ],
@@ -290,30 +329,42 @@ class CourseLibraryScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 10.h),
-                        Container(
-                          height: 50.h,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: c.surface,
-                            borderRadius: BorderRadius.circular(30.r),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.bookmark_add_outlined,
-                                color: c.primary,
-                              ),
-                              SizedBox(width: 05.w),
-                              Text(
-                                "Save to Library",
-                                style: TextStyle(
-                                  color: c.primary,
-                                  fontWeight: FontWeight.bold,
+                        Consumer<CourseProvider>(
+                          builder: (context, provider, child) {
+                            final isSaved = provider.isSaved(
+                              "Quadratic Formula",
+                            );
+
+                            return GestureDetector(
+                              onTap: () {
+                                provider.toggleSave("Quadratic Formula");
+                              },
+                              child: Container(
+                                height: 50.h,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: c.surface,
+                                  borderRadius: BorderRadius.circular(30.r),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isSaved
+                                          ? Icons.bookmark
+                                          : Icons.bookmark_add_outlined,
+                                      color: c.primary,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      isSaved ? "Saved" : "Save to Library",
+                                      style: TextStyle(color: c.primary),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                         SizedBox(height: 20.h),
                         Container(
