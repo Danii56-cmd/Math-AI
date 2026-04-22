@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/core/theme.dart';
+import 'package:math_ai/provider/aichat_provider.dart';
+import 'package:math_ai/provider/course_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:math_ai/view/Aichatbotbotscreen/Aichatbot_screen.dart';
+import 'package:math_ai/view/probleminput_screen.dart/calculator_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:math_ai/shared_widgets/main_screen.dart';
 import 'package:math_ai/view/home/home_screen.dart';
@@ -22,6 +25,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => ThemeChangerProvider()),
+        ChangeNotifierProvider(create: (_) => AiChatProvider()),
+        ChangeNotifierProvider(create: (_) => CourseProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690),
@@ -29,20 +34,8 @@ class MyApp extends StatelessWidget {
         splitScreenMode: true,
         builder: (context, child) {
           return MaterialApp(
-            theme: ThemeData(
-              brightness: Brightness.light,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: AppConstants.primaryColor,
-              ),
-            ),
-
-            darkTheme: ThemeData(
-              brightness: Brightness.dark, // ✅ THIS IS THE KEY
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: AppConstants.primaryColor,
-                brightness: Brightness.dark,
-              ),
-            ),
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
             themeMode: Provider.of<ThemeChangerProvider>(context).themeMode,
             debugShowCheckedModeBanner: false,
             initialRoute: "/",
@@ -51,6 +44,8 @@ class MyApp extends StatelessWidget {
               "/home": (context) => const HomeScreen(),
               "/main_screen": (context) => const MainScreen(),
               "/camera_screen": (context) => const CameraScreen(),
+              "/aichatbot_screen": (context) => const AichatbotScreen(),
+              "/calculator_screen": (context) => const CalculatorScreen(),
               // "/solver_screen": (context) => const SolverScreen(imageFile: imageFile),
             },
           );

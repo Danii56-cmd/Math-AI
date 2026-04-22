@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
 
 class RecentActivityListview extends StatelessWidget {
@@ -15,13 +16,14 @@ class RecentActivityListview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         height: 70,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: AppConstants.otherTextColor.withOpacity(0.1),
+          color: c.surfaceVariant,
           borderRadius: BorderRadius.circular(30),
         ),
         child: Padding(
@@ -46,15 +48,12 @@ class RecentActivityListview extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppConstants.otherTextColor,
-                    ),
+                    style: TextStyle(fontSize: 12.sp, color: c.subtitle),
                   ),
                 ],
               ),
               Spacer(),
-              Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 20.sp),
+              Icon(Icons.arrow_forward_ios, color: c.subtitle, size: 20.sp),
             ],
           ),
         ),

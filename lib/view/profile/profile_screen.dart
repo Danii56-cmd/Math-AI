@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/core/theme.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
@@ -13,46 +14,42 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // bool isDarkMode = false;
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final themeProvider = Provider.of<ThemeChangerProvider>(context);
+
     return Scaffold(
+      backgroundColor: c.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        shadowColor: AppConstants.otherTextColor,
+        backgroundColor: c.card,
+        shadowColor: c.subtitle,
         elevation: 0.7,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: AppConstants.secondaryColor,
-          ),
+          icon: Icon(Icons.arrow_back_rounded, color: c.iconColor),
           onPressed: () {
             final navProvider = Provider.of<NavigationProvider>(
               context,
               listen: false,
             );
-            navProvider.changeIndex(0); // 👈 go back to Home
+            navProvider.changeIndex(0);
           },
         ),
         title: Text(
           "Math Ai",
           style: TextStyle(
-            color: AppConstants.primaryColor,
+            color: c.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_rounded, color: AppConstants.secondaryColor),
+            icon: Icon(Icons.share_rounded, color: c.subtitle),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(
-              Icons.more_vert_rounded,
-              color: AppConstants.secondaryColor,
-            ),
+            icon: Icon(Icons.more_vert_rounded, color: c.subtitle),
             onPressed: () {},
           ),
         ],
@@ -66,6 +63,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 40.h),
+
+              // ── Profile Header ───────────────────────────────────────────
               Row(
                 children: [
                   CircleAvatar(
@@ -88,20 +87,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: c.title,
                         ),
                       ),
                       Text(
                         "Flutter Developer",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppConstants.otherTextColor,
-                        ),
+                        style: TextStyle(fontSize: 14, color: c.subtitle),
                       ),
                     ],
                   ),
                 ],
               ),
+
               SizedBox(height: 20.h),
+
+              // ── APPEARANCE Label ─────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
@@ -109,20 +109,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppConstants.otherTextColor,
+                    color: c.subtitle,
                   ),
                 ),
               ),
-              SizedBox(height: 05.h),
+              SizedBox(height: 5.h),
+
+              // ── Appearance Card ──────────────────────────────────────────
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: c.card,
                   borderRadius: BorderRadius.circular(30.r),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                  border: Border.all(color: c.border),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withOpacity(c.isDark ? 0.3 : 0.08),
                       blurRadius: 2,
                       spreadRadius: 1,
                       offset: const Offset(0, 2),
@@ -130,20 +132,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: Color.fromARGB(
-                          255,
-                          104,
-                          171,
-                          255,
-                        ).withOpacity(0.4),
+                        backgroundColor: c.iconBg,
                         child: Icon(
                           Icons.dark_mode_outlined,
-                          color: AppConstants.primaryColor,
+                          color: c.iconColor,
                         ),
                       ),
                       title: Text(
@@ -151,17 +147,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
+                          color: c.title,
                         ),
                       ),
                       subtitle: Text(
                         "Reduce eye strain in low light",
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12, color: c.subtitle),
                       ),
                       trailing: Switch(
-                        value: themeProvider.themeMode == ThemeMode.dark,
-                        thumbColor: MaterialStatePropertyAll(Colors.white),
-                        activeTrackColor: AppConstants.primaryColor,
-                        trackOutlineColor: MaterialStatePropertyAll(
+                        value: c.isDark,
+                        thumbColor: const MaterialStatePropertyAll(
+                          Colors.white,
+                        ),
+                        trackColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.primary;
+                          }
+                          return c.isDark ? Colors.white24 : Colors.black26;
+                        }),
+                        trackOutlineColor: const MaterialStatePropertyAll(
                           Colors.transparent,
                         ),
                         onChanged: (value) {
@@ -171,37 +175,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                     ),
-                    SizedBox(height: 05.h),
+                    SizedBox(height: 5.h),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: AppConstants.otherTextColor
-                            .withOpacity(0.03),
-                        child: Icon(
-                          Icons.palette_outlined,
-                          color: AppConstants.otherTextColor,
-                        ),
+                        backgroundColor: c.iconBgMuted,
+                        child: Icon(Icons.palette_outlined, color: c.iconMuted),
                       ),
                       title: Text(
                         "App Theme",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
+                          color: c.title,
                         ),
                       ),
                       subtitle: Text(
                         "Editorial Sanctuary (Default)",
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12, color: c.subtitle),
                       ),
                       trailing: Icon(
                         Icons.keyboard_arrow_right,
-                        color: AppConstants.otherTextColor,
+                        color: c.subtitle,
                       ),
                     ),
                   ],
                 ),
               ),
+
               SizedBox(height: 20.h),
+
+              // ── PREFERENCES Label ────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
@@ -209,20 +213,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppConstants.otherTextColor,
+                    color: c.subtitle,
                   ),
                 ),
               ),
-              SizedBox(height: 05.h),
+              SizedBox(height: 5.h),
+
+              // ── Preferences Card ─────────────────────────────────────────
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: c.card,
                   borderRadius: BorderRadius.circular(30.r),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                  border: Border.all(color: c.border),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withOpacity(c.isDark ? 0.3 : 0.08),
                       blurRadius: 2,
                       spreadRadius: 1,
                       offset: const Offset(0, 2),
@@ -230,20 +236,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: Color.fromARGB(
-                          255,
-                          104,
-                          171,
-                          255,
-                        ).withOpacity(0.1),
+                        backgroundColor: c.iconBg,
                         child: Icon(
                           Icons.notifications_active_outlined,
-                          color: AppConstants.otherTextColor,
+                          color: c.iconColor,
                         ),
                       ),
                       title: Text(
@@ -251,81 +251,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
+                          color: c.title,
                         ),
                       ),
                       subtitle: Text(
                         "Daily reminders and AI updates",
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12, color: c.subtitle),
                       ),
                       trailing: Switch(
-                        value: false,
-                        thumbColor: MaterialStatePropertyAll(Colors.white),
-                        activeTrackColor: AppConstants.primaryColor,
-                        trackOutlineColor: MaterialStatePropertyAll(
+                        value: true,
+                        thumbColor: const MaterialStatePropertyAll(
+                          Colors.white,
+                        ),
+                        trackColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.primary;
+                          }
+                          return c.isDark ? Colors.white24 : Colors.black26;
+                        }),
+                        trackOutlineColor: const MaterialStatePropertyAll(
                           Colors.transparent,
                         ),
                         onChanged: (value) {},
                       ),
                     ),
-                    SizedBox(height: 05.h),
+                    SizedBox(height: 5.h),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: Color.fromARGB(
-                          255,
-                          104,
-                          171,
-                          255,
-                        ).withOpacity(0.1),
-                        child: Icon(
-                          Icons.language,
-                          color: AppConstants.otherTextColor,
-                        ),
+                        backgroundColor: c.iconBg,
+                        child: Icon(Icons.language, color: c.iconColor),
                       ),
                       title: Text(
                         "Language",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
+                          color: c.title,
                         ),
                       ),
                       subtitle: Text(
                         "English (United States)",
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12, color: c.subtitle),
                       ),
                       trailing: Icon(
                         Icons.keyboard_arrow_down,
-                        color: AppConstants.otherTextColor,
+                        color: c.subtitle,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 05.h),
+
+              SizedBox(height: 5.h),
+
+              // ── Logout ───────────────────────────────────────────────────
               Center(
                 child: GestureDetector(
                   onTap: () {},
                   child: Container(
-                    // alignment: Alignment.center,
                     height: 50.h,
                     width: 100.w,
                     color: Colors.transparent,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.logout),
+                        Icon(Icons.logout, color: c.title),
                         SizedBox(width: 5.w),
-                        Text("Logout"),
+                        Text("Logout", style: TextStyle(color: c.title)),
                       ],
                     ),
                   ),
                 ),
               ),
+
+              // ── Delete Account ───────────────────────────────────────────
               Center(
                 child: GestureDetector(
                   onTap: () {},
                   child: Container(
-                    // alignment: Alignment.center,
                     height: 50.h,
                     width: 130.w,
                     color: Colors.transparent,
@@ -334,23 +338,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Icon(
                           Icons.delete_forever_outlined,
-                          color: const Color.fromARGB(
-                            255,
-                            168,
-                            56,
-                            54,
-                          ).withOpacity(0.7),
+                          color: const Color(0xFFA83836).withOpacity(0.7),
                         ),
                         SizedBox(width: 5.w),
                         Text(
                           "Delete Account",
                           style: TextStyle(
-                            color: const Color.fromARGB(
-                              255,
-                              168,
-                              56,
-                              54,
-                            ).withOpacity(0.7),
+                            color: const Color(0xFFA83836).withOpacity(0.7),
                           ),
                         ),
                       ],
@@ -358,6 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
+              SizedBox(height: 20.h),
             ],
           ),
         ),

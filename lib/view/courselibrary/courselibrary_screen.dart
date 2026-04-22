@@ -1,34 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
+import 'package:math_ai/provider/course_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
-class CourseLibraryScreen extends StatefulWidget {
-  const CourseLibraryScreen({super.key});
+class CourseLibraryScreen extends StatelessWidget {
+  CourseLibraryScreen({super.key});
 
-  @override
-  State<CourseLibraryScreen> createState() => _CourseLibraryScreenState();
-}
+  // final List<String> topics = [
+  //   "Completing the square",
+  //   "Parabola Graphing",
+  //   "Factoring Polynomials",
+  // ];
 
-class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
-  final List<String> topics = [
-    "Completing the square",
-    "Parabola Graphing",
-    "Factoring Polynomials",
-  ];
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        shadowColor: AppConstants.otherTextColor,
+        backgroundColor: c.surface,
+        shadowColor: c.subtitle,
         elevation: 0.7,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: AppConstants.secondaryColor,
-          ),
+          icon: Icon(Icons.arrow_back_rounded, color: c.iconColor),
           onPressed: () {
             final navProvider = Provider.of<NavigationProvider>(
               context,
@@ -40,21 +36,18 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
         title: Text(
           "Math Ai",
           style: TextStyle(
-            color: AppConstants.primaryColor,
+            color: c.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_rounded, color: AppConstants.secondaryColor),
+            icon: Icon(Icons.share_rounded, color: c.iconColor),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(
-              Icons.more_vert_rounded,
-              color: AppConstants.secondaryColor,
-            ),
+            icon: Icon(Icons.more_vert_rounded, color: c.iconColor),
             onPressed: () {},
           ),
         ],
@@ -80,63 +73,62 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                 SizedBox(height: 10.h),
                 Text(
                   "Explore a curated collection of\nmathematical foundations. From\nfundamental algebra to advanced\ncalculus, access the language of logic in\nits purest form",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppConstants.otherTextColor,
-                  ),
+                  style: TextStyle(fontSize: 16, color: c.subtitle),
                 ),
                 SizedBox(height: 20.h),
-                TextField(
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    fillColor: Colors.white,
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: AppConstants.otherTextColor,
-                    ),
-                    hintText:
-                        "Search for formulas (e.g. Quadratic,\nDerivative...)",
-                    hintStyle: TextStyle(color: AppConstants.otherTextColor),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.r),
-                      borderSide: BorderSide(color: Colors.transparent),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.r),
-                      borderSide: BorderSide(
-                        color: AppConstants.otherTextColor.withAlpha(5),
+                Consumer<CourseProvider>(
+                  builder: (context, courseProvider, child) {
+                    return TextField(
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        fillColor: c.surface,
+                        filled: true,
+                        prefixIcon: Icon(Icons.search, color: c.subtitle),
+                        hintText:
+                            "Search for formulas (e.g. Quadratic,\nDerivative...)",
+                        hintStyle: TextStyle(color: c.subtitle),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                          borderSide: BorderSide(
+                            color: c.subtitle.withAlpha(5),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 SizedBox(height: 10.h),
-                GestureDetector(
-                  onTap: () {
-                    print("Filter tapped");
+                Consumer<CourseProvider>(
+                  builder: (context, provider, child) {
+                    return GestureDetector(
+                      onTap: () {
+                        provider.changeFilter("Algebra"); // example
+                      },
+                      child: Container(
+                        height: 50.h,
+                        width: 130.w,
+                        decoration: BoxDecoration(
+                          color: c.surfaceVariant,
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.filter_list, color: c.subtitle),
+                            SizedBox(width: 05.w),
+                            Text(
+                              "All Topics",
+                              style: TextStyle(color: c.subtitle),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   },
-                  child: Container(
-                    height: 50.h,
-                    width: 130.w,
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 240, 244, 247),
-                      borderRadius: BorderRadius.circular(30.r),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.filter_list,
-                          color: AppConstants.otherTextColor,
-                        ),
-                        SizedBox(width: 05.w),
-                        Text(
-                          "All Topics",
-                          style: TextStyle(color: AppConstants.otherTextColor),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
                 SizedBox(height: 20.h),
                 AlgebraFoundationContainer(),
@@ -168,24 +160,21 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                       height: 30.h,
                       width: 160.w,
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 225, 239, 250),
+                        color: c.surfaceVariant,
                         borderRadius: BorderRadius.circular(30.r),
                       ),
                       child: Text(
                         overflow: TextOverflow.ellipsis,
                         "FEATURED FORMULA",
                         style: TextStyle(
-                          color: AppConstants.primaryColor,
+                          color: c.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     SizedBox(width: 10.w),
                     Expanded(
-                      child: Container(
-                        height: 1.h,
-                        color: AppConstants.otherTextColor,
-                      ),
+                      child: Container(height: 1.h, color: c.subtitle),
                     ),
                   ],
                 ),
@@ -197,7 +186,7 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                   height: 310.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: c.surface,
                     borderRadius: BorderRadius.circular(30.r),
                   ),
                   child: Column(
@@ -212,13 +201,13 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                           height: 30.h,
                           width: 110.w,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 248, 233, 250),
+                            color: c.surfaceVariant,
                             borderRadius: BorderRadius.circular(30.r),
                           ),
                           child: Text(
                             "ALGEBRA II",
                             style: TextStyle(
-                              color: Colors.black87,
+                              color: c.subtitle,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -228,10 +217,7 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                       Image.asset(height: 200.h, AppConstants.problemPic),
                       Text(
                         "Solves equations in the form\n ax² + bx + c = 0",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppConstants.otherTextColor,
-                        ),
+                        style: TextStyle(fontSize: 16, color: c.subtitle),
                       ),
                     ],
                   ),
@@ -243,10 +229,7 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                 ),
                 Text(
                   "The quadratic formula is used to find the roots of a quadratic equation. It provides the exact points where the parabola crosses the x-axis. The term inside the square root, b² - 4ac, is called the discriminant, and determines the nature of the roots.",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppConstants.otherTextColor,
-                  ),
+                  style: TextStyle(fontSize: 16, color: c.subtitle),
                 ),
                 SizedBox(height: 10.h),
                 RootsContainer(
@@ -262,10 +245,10 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                 ),
                 SizedBox(height: 20.h),
                 Container(
-                  height: 380.h,
+                  height: 440.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 240, 244, 247),
+                    color: c.surfaceVariant,
                     borderRadius: BorderRadius.circular(30.r),
                   ),
                   child: Padding(
@@ -288,18 +271,18 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                           height: 50.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: AppConstants.primaryColor,
+                            color: c.primary,
                             borderRadius: BorderRadius.circular(30.r),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.edit_note, color: Colors.white),
+                              Icon(Icons.edit_note, color: c.surface),
                               SizedBox(width: 05.w),
                               Text(
                                 "Practice with this",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: c.surface,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -311,7 +294,7 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                           height: 50.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: c.surface,
                             borderRadius: BorderRadius.circular(30.r),
                           ),
                           child: Row(
@@ -319,13 +302,13 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                             children: [
                               Icon(
                                 Icons.bookmark_add_outlined,
-                                color: AppConstants.primaryColor,
+                                color: c.primary,
                               ),
                               SizedBox(width: 05.w),
                               Text(
                                 "Save to Library",
                                 style: TextStyle(
-                                  color: AppConstants.primaryColor,
+                                  color: c.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -336,47 +319,42 @@ class _CourseLibraryScreenState extends State<CourseLibraryScreen> {
                         Container(
                           height: 0.5.h,
                           width: double.infinity,
-                          color: AppConstants.otherTextColor.withAlpha(30),
+                          color: c.subtitle.withAlpha(30),
                         ),
                         SizedBox(height: 10.h),
                         Text(
                           "Related Topics",
                           style: TextStyle(
-                            color: AppConstants.otherTextColor,
+                            color: c.subtitle,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         SizedBox(height: 10.h),
-                        ListView.builder(
-                          shrinkWrap:
-                              true, // Important: Allows the list to take only the space it needs
-                          physics:
-                              const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
-                          itemCount: topics.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              dense: true,
-                              visualDensity: const VisualDensity(
-                                vertical: -4,
-                                // horizontal: -4,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                              minLeadingWidth: 0,
-                              horizontalTitleGap: 12,
-                              leading: const Icon(
-                                Icons.circle,
-                                size: 8,
-                                color: Color(0xFF6DA4FF),
-                              ),
-                              title: Text(
-                                topics[index],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Color(0xFF333D47),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                        Consumer<CourseProvider>(
+                          builder: (context, provider, child) {
+                            final topics = provider.filteredTopics;
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: topics.length,
+                              itemBuilder: (context, index) {
+                                final topic = topics[index];
+                                return ListTile(
+                                  leading: Icon(Icons.circle, size: 8),
+                                  title: Text(topic),
+                                  trailing: IconButton(
+                                    icon: Icon(
+                                      provider.isSaved(topic)
+                                          ? Icons.bookmark
+                                          : Icons.bookmark_border,
+                                    ),
+                                    onPressed: () {
+                                      provider.toggleSave(topic);
+                                    },
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
@@ -405,13 +383,14 @@ class RootsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       height: 70.h,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 248, 247, 247),
+        color: c.surfaceVariant,
         borderRadius: BorderRadius.circular(30.r),
-        border: Border.all(color: AppConstants.otherTextColor.withAlpha(03)),
+        border: Border.all(color: c.subtitle.withAlpha(03)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -424,10 +403,10 @@ class RootsContainer extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: AppConstants.otherTextColor,
+                color: c.subtitle,
               ),
             ),
-            Text(subtitle, style: TextStyle(fontSize: 16)),
+            Text(subtitle, style: TextStyle(fontSize: 16, color: c.title)),
           ],
         ),
       ),
@@ -448,12 +427,13 @@ class CourseLibraryContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       height: 170.h,
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(color: AppConstants.otherTextColor.withAlpha(05)),
-        color: Color.fromARGB(170, 240, 244, 247),
+        border: Border.all(color: c.subtitle.withAlpha(05)),
+        color: c.surfaceVariant,
         borderRadius: BorderRadius.circular(30.r),
       ),
       child: Padding(
@@ -464,25 +444,15 @@ class CourseLibraryContainer extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 25.r,
-              backgroundColor: Color.fromARGB(255, 214, 229, 239),
-              child: Icon(
-                icon,
-                color: AppConstants.otherTextColor,
-                size: 30.sp,
-              ),
+              backgroundColor: c.surfaceVariant,
+              child: Icon(icon, color: c.primary, size: 30.sp),
             ),
             SizedBox(height: 10.h),
             Text(
               title,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 16,
-                color: AppConstants.otherTextColor,
-              ),
-            ),
+            Text(subtitle, style: TextStyle(fontSize: 16, color: c.subtitle)),
           ],
         ),
       ),
@@ -495,12 +465,13 @@ class CalculusContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       height: 300.h,
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(color: AppConstants.otherTextColor.withAlpha(05)),
-        color: Color.fromARGB(102, 247, 242, 251),
+        border: Border.all(color: c.subtitle.withAlpha(50)),
+        color: Color.fromARGB(255, 248, 233, 250).withAlpha(50),
         borderRadius: BorderRadius.circular(30.r),
       ),
       child: Padding(
@@ -514,14 +485,10 @@ class CalculusContainer extends StatelessWidget {
               height: 50.h,
               width: 55.w,
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 102, 92, 105),
+                color: c.surfaceVariant,
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(
-                Icons.change_history,
-                color: Colors.white,
-                size: 30.sp,
-              ),
+              child: Icon(Icons.change_history, color: c.primary, size: 30.sp),
             ),
             SizedBox(height: 10.h),
             Text(
@@ -530,10 +497,7 @@ class CalculusContainer extends StatelessWidget {
             ),
             Text(
               "Study of change and motion.",
-              style: TextStyle(
-                fontSize: 16,
-                color: AppConstants.otherTextColor,
-              ),
+              style: TextStyle(fontSize: 16, color: c.subtitle),
             ),
             SizedBox(height: 20.h),
             Column(
@@ -544,7 +508,8 @@ class CalculusContainer extends StatelessWidget {
                     height: 40.h,
                     width: 250.w,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: c.surface,
+                      border: Border.all(color: c.subtitle.withAlpha(50)),
                       borderRadius: BorderRadius.circular(30.r),
                     ),
                     child: Row(
@@ -556,14 +521,11 @@ class CalculusContainer extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: c.subtitle,
                           ),
                         ),
                         Spacer(),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: AppConstants.otherTextColor,
-                        ),
+                        Icon(Icons.keyboard_arrow_right, color: c.iconColor),
                       ],
                     ),
                   ),
@@ -575,7 +537,8 @@ class CalculusContainer extends StatelessWidget {
                     height: 40.h,
                     width: 250.w,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: c.surface,
+                      border: Border.all(color: c.subtitle.withAlpha(50)),
                       borderRadius: BorderRadius.circular(30.r),
                     ),
                     child: Row(
@@ -587,14 +550,11 @@ class CalculusContainer extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: c.subtitle,
                           ),
                         ),
                         Spacer(),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: AppConstants.otherTextColor,
-                        ),
+                        Icon(Icons.keyboard_arrow_right, color: c.iconColor),
                       ],
                     ),
                   ),
@@ -613,6 +573,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       height: 300.h,
       width: double.infinity,
@@ -639,22 +600,23 @@ class AlgebraFoundationContainer extends StatelessWidget {
               height: 50.h,
               width: 50.w,
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor,
+                color: c.surfaceVariant,
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(Icons.functions, color: Colors.white, size: 30.sp),
+              child: Icon(Icons.functions, color: c.primary, size: 30.sp),
             ),
             SizedBox(height: 10.h),
             Text(
               "Algebra Foundations",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: c.title,
+              ),
             ),
             Text(
               "Variables, equations, and the\nstructural foundations of mathematical\nreasoning.",
-              style: TextStyle(
-                fontSize: 16,
-                color: AppConstants.otherTextColor,
-              ),
+              style: TextStyle(fontSize: 16, color: c.subtitle),
             ),
             SizedBox(height: 10.h),
             Row(
@@ -663,7 +625,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
                   height: 30.h,
                   width: 100.w,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: c.surface,
                     borderRadius: BorderRadius.circular(30.r),
                   ),
                   child: Center(
@@ -672,7 +634,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: AppConstants.primaryColor,
+                        color: c.primary,
                       ),
                     ),
                   ),
@@ -682,7 +644,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
                   height: 30.h,
                   width: 100.w,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: c.surface,
                     borderRadius: BorderRadius.circular(30.r),
                   ),
                   child: Center(
@@ -691,7 +653,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: AppConstants.primaryColor,
+                        color: c.primary,
                       ),
                     ),
                   ),
@@ -703,7 +665,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
               height: 30.h,
               width: 70.w,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: c.surface,
                 borderRadius: BorderRadius.circular(30.r),
               ),
               child: Center(
@@ -712,7 +674,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: AppConstants.primaryColor,
+                    color: c.primary,
                   ),
                 ),
               ),

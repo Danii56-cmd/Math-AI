@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/view/home/container_slider.dart';
@@ -20,10 +21,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _selectedTabIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    int _selectedTabIndex = 0;
-    List recentActivity = [
+    final c = AppColors.of(context); // ← single line replaces everything
+
+    final List recentActivity = [
       {
         "icon": AppConstants.quadraticIcon,
         "title": "Quadratic Equation",
@@ -35,9 +39,14 @@ class _HomeScreenState extends State<HomeScreen> {
         "subtitle": "Solved 5h ago • Geometry",
       },
     ];
+
     return Scaffold(
+      backgroundColor: c.bg,
       appBar: AppBar(
-        leading: Icon(Icons.menu, color: AppConstants.secondaryColor),
+        backgroundColor: c.card,
+        elevation: 0.7,
+        shadowColor: c.subtitle,
+        leading: Icon(Icons.menu, color: c.title),
         title: Text(
           "Math Ai",
           style: TextStyle(
@@ -47,10 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          Icon(
-            Icons.notifications_outlined,
-            color: Color.fromARGB(255, 148, 163, 184),
-          ),
+          Icon(Icons.notifications_outlined, color: c.subtitle),
           SizedBox(width: 20.w),
         ],
       ),
@@ -62,35 +68,35 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 20.h),
+
+              // ── Search Bar ───────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: TextField(
+                  style: TextStyle(color: c.title),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: AppConstants.otherTextColor,
-                    ),
+                    filled: true,
+                    fillColor: c.card,
+                    prefixIcon: Icon(Icons.search, color: c.subtitle),
                     hintText: "Search math problems...",
-                    hintStyle: TextStyle(color: AppConstants.otherTextColor),
+                    hintStyle: TextStyle(color: c.subtitle),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(
-                        color: AppConstants.otherTextColor.withOpacity(0.1),
-                      ),
+                      borderSide: BorderSide(color: c.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(
-                        color: AppConstants.otherTextColor.withOpacity(0.1),
-                      ),
+                      borderSide: BorderSide(color: c.primary.withOpacity(0.5)),
                     ),
                   ),
                 ),
               ),
+
               SizedBox(height: 25.h),
-              // PageView.Builder for the Slider and Container
               const ContainerSlider(),
-              SizedBox(height: 20),
+              SizedBox(height: 20.h),
+
+              // ── Tab Bar ──────────────────────────────────────────────────
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: SizedBox(
@@ -105,48 +111,60 @@ class _HomeScreenState extends State<HomeScreen> {
                           setState(() {
                             _selectedTabIndex = index;
                           });
-                          // This is where you will eventually filter your math problems
                         },
                       );
                     },
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+
+              SizedBox(height: 10.h),
+
+              // ── View All ─────────────────────────────────────────────────
               Container(
-                margin: EdgeInsets.only(left: 310),
+                margin: const EdgeInsets.only(left: 310),
                 alignment: Alignment.center,
                 height: 35,
                 width: 75,
                 decoration: BoxDecoration(
-                  color: AppConstants.otherTextColor.withOpacity(0.1),
+                  color: c.card,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: c.border),
                 ),
                 child: Text(
                   "View All",
                   style: TextStyle(
-                    color: Colors.black54,
+                    color: c.subtitle,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+
+              SizedBox(height: 10.h),
+
+              // ── Start Solving ────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Text(
                   "Start Solving",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: c.title,
+                  ),
                 ),
               ),
-              SizedBox(width: 20.w),
+
+              SizedBox(height: 10.h),
+
+              // ── Grid ─────────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.count(
-                  crossAxisCount: 2, // 2 items per row
-                  shrinkWrap:
-                      true, // Crucial since it's inside a Column/Scrollview
-                  physics:
-                      const NeverScrollableScrollPhysics(), // Parent handles scrolling
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
                     CustomGridViewContainer(
                       icon: AppConstants.cameraIcon,
@@ -159,13 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context) => CameraScreen(),
                           ),
                         );
-
                         if (result != null) {
-                          // ✅ Switch to Solver tab (index 3)
-                          // setState(() {
-                          //   currentIndex = 3;
-                          //   capturedImage = result; // store globally or in state
-                          // });
                           context.read<NavigationProvider>().changeIndex(2);
                         }
                       },
@@ -176,20 +188,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       subtitle: "Pick from gallery",
                       onTap: () async {
                         final ImagePicker picker = ImagePicker();
-
                         final XFile? pickedFile = await picker.pickImage(
                           source: ImageSource.gallery,
                         );
-
                         if (pickedFile != null) {
                           final navProvider = Provider.of<NavigationProvider>(
                             context,
                             listen: false,
                           );
-
                           navProvider.setImageAndNavigate(
                             File(pickedFile.path),
-                            2, // 👈 Solver tab index
+                            2,
                           );
                         }
                       },
@@ -198,7 +207,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       icon: AppConstants.keyboardIcon,
                       title: "Type Problem",
                       subtitle: "Enter expression",
-                      onTap: () {},
+                      onTap: () {
+                        context.read<NavigationProvider>().changeIndex(0);
+                        Navigator.pushNamed(context, "/calculator_screen");
+                      },
                     ),
                     CustomGridViewContainer(
                       icon: AppConstants.aiIcon,
@@ -211,20 +223,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 10),
+
+              SizedBox(height: 10.h),
+
+              // ── Recent Activity ──────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Text(
                   "Recent Activity",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: c.title,
+                  ),
                 ),
               ),
-              SizedBox(height: 10),
+
+              const SizedBox(height: 10),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ListView.builder(
                   shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: 2,
                   itemBuilder: (context, index) {
                     return RecentActivityListview(
@@ -235,6 +256,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ),
+
+              SizedBox(height: 20.h),
             ],
           ),
         ),

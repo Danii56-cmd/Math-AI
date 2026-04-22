@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:provider/provider.dart';
@@ -9,18 +10,16 @@ class SolverScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final navProvider = Provider.of<NavigationProvider>(context);
     final imageFile = navProvider.capturedImage;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        shadowColor: AppConstants.otherTextColor,
+        backgroundColor: c.surface,
+        shadowColor: c.border,
         elevation: 0.7,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: AppConstants.secondaryColor,
-          ),
+          icon: Icon(Icons.arrow_back_rounded, color: c.iconColor),
           onPressed: () {
             final navProvider = Provider.of<NavigationProvider>(
               context,
@@ -33,21 +32,18 @@ class SolverScreen extends StatelessWidget {
         title: Text(
           "Math Ai",
           style: TextStyle(
-            color: AppConstants.primaryColor,
+            color: c.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_rounded, color: AppConstants.secondaryColor),
+            icon: Icon(Icons.share_rounded, color: c.iconColor),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(
-              Icons.more_vert_rounded,
-              color: AppConstants.secondaryColor,
-            ),
+            icon: Icon(Icons.more_vert_rounded, color: c.iconColor),
             onPressed: () {},
           ),
         ],
@@ -87,10 +83,7 @@ class SolverScreen extends StatelessWidget {
                       children: [
                         Text(
                           "Captured Problem",
-                          style: TextStyle(
-                            color: AppConstants.primaryColor,
-                            fontSize: 14.sp,
-                          ),
+                          style: TextStyle(color: c.primary, fontSize: 14.sp),
                         ),
                         Container(
                           margin: EdgeInsets.symmetric(
@@ -103,13 +96,8 @@ class SolverScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                const Color.fromARGB(
-                                  1,
-                                  0,
-                                  118,
-                                  214,
-                                ).withOpacity(0.1),
-                                Colors.white,
+                                c.primary.withValues(alpha: 0.1),
+                                c.surface,
                               ],
                               stops: const [0.0, 0.025], // 👈 key magic
                               begin: Alignment.centerLeft,
@@ -117,7 +105,7 @@ class SolverScreen extends StatelessWidget {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: c.border.withOpacity(0.08),
                                 blurRadius: 2,
                                 spreadRadius: 1,
                                 offset: const Offset(0, 1),
@@ -129,19 +117,13 @@ class SolverScreen extends StatelessWidget {
                             padding: EdgeInsets.only(left: 40.w, top: 20.h),
                             child: Text(
                               "∫ (3x² + 2x + 1) dx",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16.sp,
-                              ),
+                              style: TextStyle(color: c.title, fontSize: 16.sp),
                             ),
                           ),
                         ),
                         Text(
                           "Evaluate the indefinite integral with respect to x.",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 12.sp,
-                          ),
+                          style: TextStyle(color: c.subtitle, fontSize: 12.sp),
                         ),
                         SizedBox(height: 20),
                         Row(
@@ -150,7 +132,7 @@ class SolverScreen extends StatelessWidget {
                             Text(
                               "Step-by-Step\nBreakdown",
                               style: TextStyle(
-                                color: Colors.black,
+                                color: c.title,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -162,13 +144,13 @@ class SolverScreen extends StatelessWidget {
                                 height: 42,
                                 width: 90,
                                 decoration: BoxDecoration(
-                                  color: Color(0xffF8E9FA),
+                                  color: c.surfaceVariant,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   "Calculus AI\nv2.4",
                                   style: TextStyle(
-                                    color: Color.fromARGB(255, 95, 85, 98),
+                                    color: c.subtitle,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -198,7 +180,7 @@ class SolverScreen extends StatelessWidget {
                           height: 130.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: c.surface,
                             borderRadius: BorderRadius.circular(20.r),
                             boxShadow: [
                               // Outer shadow
@@ -246,14 +228,14 @@ class SolverScreen extends StatelessWidget {
                                 height: 25.r,
                                 width: 100.r,
                                 decoration: BoxDecoration(
-                                  color: AppConstants.primaryColor,
+                                  color: c.primary,
                                   borderRadius: BorderRadius.circular(20.r),
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
                                   "FINAL RESULTS",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: c.surface,
                                     fontSize: 08.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -263,7 +245,7 @@ class SolverScreen extends StatelessWidget {
                               Text(
                                 "x³ + x² + x + C",
                                 style: TextStyle(
-                                  color: AppConstants.primaryColor,
+                                  color: c.primary,
                                   fontSize: 22.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -277,27 +259,33 @@ class SolverScreen extends StatelessWidget {
               Column(
                 children: [
                   SolverAIContainer(
-                    color: Colors.white,
+                    color: c.surface,
                     text: "Explain More",
                     icon: Icons.auto_awesome_outlined,
-                    textColor: AppConstants.primaryColor,
-                    iconColor: AppConstants.primaryColor,
+                    textColor: c.primary,
+                    iconColor: c.primary,
+                    onTap: () {},
                   ),
                   SizedBox(height: 10.h),
                   SolverAIContainer(
-                    color: AppConstants.primaryColor,
+                    color: c.primary,
                     text: "Ask AI Chat",
                     icon: Icons.smart_toy_outlined,
-                    textColor: Colors.white,
-                    iconColor: Colors.white,
+                    textColor: c.surface,
+                    iconColor: c.surface,
+                    onTap: () {
+                      Navigator.pushNamed(context, "/aichatbot_screen");
+                    },
                   ),
+
                   SizedBox(height: 10.h),
                   SolverAIContainer(
-                    color: Colors.white,
+                    onTap: () {},
+                    color: c.surface,
                     text: "Similar Task",
                     icon: Icons.history,
-                    textColor: AppConstants.primaryColor,
-                    iconColor: AppConstants.primaryColor,
+                    textColor: c.primary,
+                    iconColor: c.primary,
                   ),
                 ],
               ),
@@ -316,43 +304,47 @@ class SolverAIContainer extends StatelessWidget {
   final color;
   final textColor;
   final iconColor;
-  const SolverAIContainer({
+  final VoidCallback onTap;
+  SolverAIContainer({
     super.key,
     this.text,
     this.icon,
     this.color,
     this.textColor,
     this.iconColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10.w),
-      alignment: Alignment.center,
-      height: 50.h,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: color,
-        border: Border.all(
-          color: AppConstants.otherTextColor.withOpacity(0.05),
+    final c = AppColors.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 10.w),
+        alignment: Alignment.center,
+        height: 50.h,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: color,
+          border: Border.all(color: c.border),
+          borderRadius: BorderRadius.circular(30.r),
         ),
-        borderRadius: BorderRadius.circular(30.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: iconColor, size: 20.sp),
-          SizedBox(width: 10.w),
-          Text(
-            text,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: iconColor, size: 20.sp),
+            SizedBox(width: 10.w),
+            Text(
+              text,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -364,11 +356,12 @@ class SolverScreenStepsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10.h),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F4F7), // Light grayish-blue background
+        color: c.surface,
         borderRadius: BorderRadius.circular(24.r),
       ),
       child: Stack(
@@ -382,7 +375,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
               style: TextStyle(
                 fontSize: 40.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueGrey.withOpacity(0.1),
+                color: c.subtitle.withOpacity(0.1),
               ),
             ),
           ),
@@ -401,11 +394,11 @@ class SolverScreenStepsContainer extends StatelessWidget {
                       height: 40.r,
                       width: 40.r,
                       decoration: BoxDecoration(
-                        color: AppConstants.primaryColor,
+                        color: c.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppConstants.primaryColor.withOpacity(0.3),
+                            color: c.primary.withOpacity(0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -415,7 +408,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
                       child: Text(
                         (int.parse(steps) + 1).toString(),
                         style: TextStyle(
-                          color: Colors.white,
+                          color: c.surface,
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -431,7 +424,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF2D3133),
+                            color: c.title,
                           ),
                         ),
                       ),
@@ -446,7 +439,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
                     "The integral of a sum is the sum of the integrals. We can separate the polynomial into individual terms.",
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: Colors.black54,
+                      color: c.subtitle,
                       height: 1.5,
                     ),
                   ),
@@ -460,7 +453,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
                     vertical: 15.h,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: c.surface,
                     borderRadius: BorderRadius.circular(30.r),
                   ),
                   child: Text(
@@ -468,7 +461,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontFamily: 'Courier', // Or a math-specific font
-                      color: const Color(0xFF2D3133),
+                      color: c.title,
                     ),
                   ),
                 ),
