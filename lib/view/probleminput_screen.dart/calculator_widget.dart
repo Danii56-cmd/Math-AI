@@ -25,6 +25,7 @@ class MathCalculatorWidget extends StatefulWidget {
 
 class _MathCalculatorWidgetState extends State<MathCalculatorWidget>
     with SingleTickerProviderStateMixin {
+      final GlobalKey _calculatorKey = GlobalKey();
   late TabController _tabController;
 
   @override

@@ -13,6 +13,44 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  void _openCalculator() {
+    FocusScope.of(context).unfocus();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: MathCalculatorWidget(
+            onKeyTap: (value) {
+              setState(() {
+                _controller.text += value;
+              });
+            },
+            onBackspace: () {
+              if (_controller.text.isNotEmpty) {
+                setState(() {
+                  _controller.text = _controller.text.substring(
+                    0,
+                    _controller.text.length - 1,
+                  );
+                });
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -112,6 +150,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           controller: _controller,
                           textAlign: TextAlign.center,
                           maxLines: 2,
+                          readOnly: true,
+                          showCursor: true,
                           decoration: InputDecoration(
                             hintText:
                                 "Enter your equation or\nmathematical problem",
@@ -127,6 +167,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             fontWeight: FontWeight.w400,
                             color: c.title,
                           ),
+                          onTap: _openCalculator,
                         ),
                       ),
                       Row(
@@ -185,17 +226,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 SizedBox(height: 20.h),
                 // calculator widget
-                MathCalculatorWidget(
-                  onKeyTap: (value) {
-                    _controller.text += value;
-                  },
-                  onBackspace: () {
-                    _controller.text = _controller.text.substring(
-                      0,
-                      _controller.text.length - 1,
-                    );
-                  },
-                ),
+                // MathCalculatorWidget(
+                //   onKeyTap: (value) {
+                //     _controller.text += value;
+                //   },
+                //   onBackspace: () {
+                //     _controller.text = _controller.text.substring(
+                //       0,
+                //       _controller.text.length - 1,
+                //     );
+                //   },
+                // ),
                 SizedBox(height: 10.h),
                 Divider(
                   color: c.primary,
