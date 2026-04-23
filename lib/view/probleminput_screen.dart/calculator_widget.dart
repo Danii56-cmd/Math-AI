@@ -12,11 +12,15 @@ class MathCalculatorWidget extends StatefulWidget {
 
   /// Called when the backspace key is tapped.
   final VoidCallback onBackspace;
+  final VoidCallback onBackspaceLongPressStart;
+  final VoidCallback onBackspaceLongPressEnd;
 
   const MathCalculatorWidget({
     Key? key,
     required this.onKeyTap,
     required this.onBackspace,
+    required this.onBackspaceLongPressStart,
+    required this.onBackspaceLongPressEnd,
   }) : super(key: key);
 
   @override
@@ -25,7 +29,7 @@ class MathCalculatorWidget extends StatefulWidget {
 
 class _MathCalculatorWidgetState extends State<MathCalculatorWidget>
     with SingleTickerProviderStateMixin {
-      final GlobalKey _calculatorKey = GlobalKey();
+  // final GlobalKey _calculatorKey = GlobalKey();
   late TabController _tabController;
 
   @override

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
-import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +13,7 @@ class SolverScreen extends StatelessWidget {
     final navProvider = Provider.of<NavigationProvider>(context);
     final imageFile = navProvider.capturedImage;
     return Scaffold(
+      backgroundColor: c.bg,
       appBar: AppBar(
         backgroundColor: c.surface,
         shadowColor: c.border,
