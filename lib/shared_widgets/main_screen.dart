@@ -16,7 +16,7 @@ class MainScreen extends StatelessWidget {
   static final List<Widget> _screens = [
     HomeScreen(),
     HistoryScreen(),
-    SolverScreen(),
+    SolverScreen(expression: ""),
     CourseLibraryScreen(),
     ProfileScreen(),
   ];
@@ -29,7 +29,12 @@ class MainScreen extends StatelessWidget {
       backgroundColor: c.bg,
       // ── Consumer only wraps what actually needs to rebuild ──
       body: Consumer<NavigationProvider>(
-        builder: (context, nav, child) => _screens[nav.selectedIndex],
+        builder: (context, nav, child) {
+          if (nav.selectedIndex == 2) {
+            return SolverScreen(expression: nav.expression ?? "");
+          }
+          return _screens[nav.selectedIndex];
+        },
       ),
 
       bottomNavigationBar: Consumer<NavigationProvider>(

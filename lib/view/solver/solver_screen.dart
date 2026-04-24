@@ -5,8 +5,9 @@ import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
 class SolverScreen extends StatelessWidget {
-  const SolverScreen({super.key});
+  final String expression;
 
+  const SolverScreen({Key? key, required this.expression}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
@@ -25,7 +26,7 @@ class SolverScreen extends StatelessWidget {
               context,
               listen: false,
             );
-            navProvider.changeIndex(0); // 👈 go back to Home
+            navProvider.changeIndex(0); // go back to Home
             navProvider.clearImage(); // clear image when goes back
           },
         ),
@@ -116,7 +117,7 @@ class SolverScreen extends StatelessWidget {
                           child: Padding(
                             padding: EdgeInsets.only(left: 40.w, top: 20.h),
                             child: Text(
-                              "∫ (3x² + 2x + 1) dx",
+                              expression.isEmpty ? "No expression" : expression,
                               style: TextStyle(color: c.title, fontSize: 16.sp),
                             ),
                           ),

@@ -6,6 +6,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:math_ai/services/ocr_service.dart';
+import 'package:math_ai/utills/math_cleaner.dart';
 import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -247,20 +249,48 @@ class _CameraScreenState extends State<CameraScreen> {
           onTap: () async {
             if (isCapturing) return;
 
-            final ImagePicker picker = ImagePicker();
-            final XFile? pickedFile = await picker.pickImage(
-              source: ImageSource.gallery,
-            );
+            try {
+              final ImagePicker picker = ImagePicker();
+              final XFile? pickedFile = await picker.pickImage(
+                source: ImageSource.gallery,
+              );
 
-            if (pickedFile != null) {
+              if (pickedFile == null) return;
+
+              setState(() => isCapturing = true);
+
+              File image = File(pickedFile.path);
+
+              // 🧠 OCR
+              String extractedText = await OCRService.extractText(image);
+
+              // 🧹 Clean
+              String cleanedText = MathCleaner.clean(extractedText);
+
+              // ❌ if empty
+              if (cleanedText.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("No math detected. Try again.")),
+                );
+                return;
+              }
+
+              // 🚀 NAVIGATE (PROPER WAY)
               final navProvider = Provider.of<NavigationProvider>(
                 context,
                 listen: false,
               );
 
-              navProvider.setImageAndNavigate(File(pickedFile.path), 2);
-
+              navProvider.setExpressionAndNavigate(
+                cleanedText,
+                2,
+                image: image,
+              );
               if (mounted) Navigator.pop(context);
+            } catch (e) {
+              debugPrint("Gallery error: $e");
+            } finally {
+              if (mounted) setState(() => isCapturing = false);
             }
           },
           child: Container(
@@ -295,13 +325,27 @@ class _CameraScreenState extends State<CameraScreen> {
           final XFile file = await controller!.takePicture();
           File image = File(file.path);
 
+          // 🧠 OCR
+          String extractedText = await OCRService.extractText(image);
+
+          // 🧹 Clean
+          String cleanedText = MathCleaner.clean(extractedText);
+
+          // ❌ empty check
+          if (cleanedText.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("No math detected. Try again.")),
+            );
+            return;
+          }
+
+          // 🔥 NAVIGATE TO SOLVER
           final navProvider = Provider.of<NavigationProvider>(
             context,
             listen: false,
           );
 
-          navProvider.setImageAndNavigate(image, 2);
-
+          navProvider.setExpressionAndNavigate(cleanedText, 2, image: image);
           if (mounted) Navigator.pop(context);
         } catch (e) {
           debugPrint("Camera capture error: $e");
@@ -309,6 +353,7 @@ class _CameraScreenState extends State<CameraScreen> {
           if (mounted) setState(() => isCapturing = false);
         }
       },
+
       child: isCapturing
           ? SpinKitCircle(color: Colors.white, size: 50)
           : Container(

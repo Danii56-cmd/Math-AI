@@ -46,14 +46,14 @@ class AppColors {
       card: isDark ? AppTheme.secondary : Colors.white,
       title: isDark ? Colors.white : Colors.black,
       subtitle: isDark ? Colors.white54 : const Color(0xFF64748B),
-      border: isDark ? const Color(0xFF334155) : Colors.grey.withOpacity(0.2),
+      border: isDark ? const Color(0xFF334155) : Colors.grey.withAlpha(20),
       iconBg: isDark
-          ? AppTheme.primary.withOpacity(0.15)
-          : AppConstants.primaryColor.withOpacity(0.12),
+          ? AppTheme.primary.withAlpha(15)
+          : AppConstants.primaryColor.withAlpha(12),
       iconColor: isDark ? AppTheme.primary : AppConstants.primaryColor,
       iconBgMuted: isDark
-          ? Colors.white.withOpacity(0.08)
-          : AppConstants.otherTextColor.withOpacity(0.03),
+          ? Colors.white.withAlpha(8)
+          : AppConstants.otherTextColor.withAlpha(3),
       iconMuted: isDark ? Colors.white54 : AppConstants.otherTextColor,
       surface: isDark ? AppTheme.secondary : Colors.white,
       surfaceVariant: isDark
