@@ -4,6 +4,7 @@ import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/core/theme.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:math_ai/provider/profile_provider.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final themeProvider = Provider.of<ThemeChangerProvider>(context);
-
+    final profileProvider = Provider.of<ProfileProvider>(context);
     return Scaffold(
       backgroundColor: c.bg,
       appBar: AppBar(
@@ -45,11 +46,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_rounded, color: c.subtitle),
+            icon: Icon(Icons.share_rounded, color: c.primary),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.more_vert_rounded, color: c.subtitle),
+            icon: Icon(Icons.more_vert_rounded, color: c.primary),
             onPressed: () {},
           ),
         ],
@@ -259,7 +260,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(fontSize: 12, color: c.subtitle),
                       ),
                       trailing: Switch(
-                        value: true,
+                        value: profileProvider.notificationsEnabled,
+                        onChanged: profileProvider.toggleNotifications,
                         thumbColor: const MaterialStatePropertyAll(
                           Colors.white,
                         ),
@@ -272,7 +274,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trackOutlineColor: const MaterialStatePropertyAll(
                           Colors.transparent,
                         ),
-                        onChanged: (value) {},
                       ),
                     ),
                     SizedBox(height: 5.h),

@@ -12,11 +12,15 @@ class MathCalculatorWidget extends StatefulWidget {
 
   /// Called when the backspace key is tapped.
   final VoidCallback onBackspace;
+  final VoidCallback onBackspaceLongPressStart;
+  final VoidCallback onBackspaceLongPressEnd;
 
   const MathCalculatorWidget({
     Key? key,
     required this.onKeyTap,
     required this.onBackspace,
+    required this.onBackspaceLongPressStart,
+    required this.onBackspaceLongPressEnd,
   }) : super(key: key);
 
   @override
@@ -25,6 +29,7 @@ class MathCalculatorWidget extends StatefulWidget {
 
 class _MathCalculatorWidgetState extends State<MathCalculatorWidget>
     with SingleTickerProviderStateMixin {
+  // final GlobalKey _calculatorKey = GlobalKey();
   late TabController _tabController;
 
   @override
@@ -308,7 +313,7 @@ class _KeyGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 6,
       crossAxisSpacing: 6,
-      childAspectRatio: 1.15,
+      childAspectRatio: 0.9,
       children: children,
     );
   }
@@ -348,7 +353,7 @@ class _CalcButton extends StatelessWidget {
       bg = c.primary.withOpacity(0.15);
       fg = c.primary;
     } else if (isFunction || isSpecial) {
-      bg = c.surfaceVariant;
+      bg = c.iconBgMuted;
       fg = c.subtitle;
     } else {
       // number

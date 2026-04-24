@@ -19,7 +19,7 @@ class HistoryScreen extends StatelessWidget {
         elevation: 0.7,
         shadowColor: c.subtitle.withOpacity(0.1),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: c.title),
+          icon: Icon(Icons.arrow_back_rounded, color: c.primary),
           onPressed: () {
             final navProvider = Provider.of<NavigationProvider>(
               context,
@@ -38,11 +38,11 @@ class HistoryScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_rounded, color: c.title),
+            icon: Icon(Icons.share_rounded, color: c.primary),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.more_vert_rounded, color: c.title),
+            icon: Icon(Icons.more_vert_rounded, color: c.primary),
             onPressed: () {},
           ),
         ],

@@ -19,6 +19,7 @@ class CourseLibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return Scaffold(
+      backgroundColor: c.bg,
       appBar: AppBar(
         backgroundColor: c.surface,
         shadowColor: c.subtitle,
@@ -100,6 +101,7 @@ class CourseLibraryScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      onChanged: (value) => courseProvider.updateSearch(value),
                     );
                   },
                 ),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "482510938256",
+    "project_id": "math-ai-90d85",
+    "storage_bucket": "math-ai-90d85.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482510938256:android:5e73eb43404429fabe3815",
+        "android_client_info": {
+          "package_name": "com.codexdevs.math_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7Os9I2L9gyzD99BH-YBaxZEySVtsGGyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/view/courselibrary/courselibrary_screen.dart';
 import 'package:math_ai/view/history/history_screen.dart';
@@ -15,17 +16,25 @@ class MainScreen extends StatelessWidget {
   static final List<Widget> _screens = [
     HomeScreen(),
     HistoryScreen(),
-    SolverScreen(),
+    SolverScreen(expression: ""),
     CourseLibraryScreen(),
     ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     return Scaffold(
+      backgroundColor: c.bg,
       // ── Consumer only wraps what actually needs to rebuild ──
       body: Consumer<NavigationProvider>(
-        builder: (context, nav, child) => _screens[nav.selectedIndex],
+        builder: (context, nav, child) {
+          if (nav.selectedIndex == 2) {
+            return SolverScreen(expression: nav.expression ?? "");
+          }
+          return _screens[nav.selectedIndex];
+        },
       ),
 
       bottomNavigationBar: Consumer<NavigationProvider>(
