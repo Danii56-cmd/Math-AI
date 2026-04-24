@@ -28,10 +28,10 @@ class AppTheme {
       primary: AppConstants.primaryColor,
       secondary: AppConstants.primaryColor,
       surface: Colors.white,
-      background: Colors.white,
+      // background: Colors.white,
       onPrimary: Colors.white,
       onSurface: Colors.black,
-      onBackground: Colors.black,
+      // onBackground: Colors.black,
     ),
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(
