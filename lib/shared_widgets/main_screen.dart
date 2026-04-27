@@ -46,16 +46,12 @@ class MainScreen extends StatelessWidget {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(30.r),
               border: Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withOpacity(0.08),
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(20),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? 0.3
-                        : 0.08,
+                  color: Colors.black.withAlpha(
+                    Theme.of(context).brightness == Brightness.dark ? 10 : 8,
                   ),
                   blurRadius: 8,
                   spreadRadius: 1,
@@ -133,13 +129,13 @@ class BottomIcon extends StatelessWidget {
           CircleAvatar(
             radius: 22.r,
             backgroundColor: isSelected
-                ? colorScheme.primary.withOpacity(0.15)
+                ? colorScheme.primary
                 : Colors.transparent,
             child: Icon(
               icon,
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.onSurface.withOpacity(0.6),
+                  ? colorScheme.surface
+                  : colorScheme.onSurface.withAlpha(60),
               size: 25.sp,
             ),
           ),
@@ -151,7 +147,7 @@ class BottomIcon extends StatelessWidget {
               style: TextStyle(
                 color: isSelected
                     ? colorScheme.primary
-                    : colorScheme.onSurface.withOpacity(0.6),
+                    : colorScheme.onSurface.withAlpha(60),
                 fontSize: 10.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),

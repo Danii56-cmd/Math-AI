@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/gemini_service.dart';
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 enum MessageRole { user, ai }
@@ -82,8 +83,8 @@ class AiChatProvider with ChangeNotifier {
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  // ── Send user message (connect your API here later) ───────────────────────
-  void sendMessage() {
+  // ── Send user message ───────────────────────────────────────────────────────
+  Future<void> sendMessage() async {
     final text = controller.text.trim();
     if (text.isEmpty) return;
 
@@ -94,18 +95,53 @@ class AiChatProvider with ChangeNotifier {
     notifyListeners();
     _scrollToBottom();
 
-    // Simulated AI reply — replace this Future.delayed block with your API call
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    try {
+      final result = await GeminiService.solveMath(text);
+
+      _isTyping = false;
+
+      final isMathProblem = result['is_math_problem'] as bool? ?? true;
+
+      if (!isMathProblem) {
+        final textReply = result['text_reply']?.toString() ?? "I didn't quite get that.";
+        _messages.add(ChatMessage.text(text: textReply, role: MessageRole.ai));
+      } else {
+        final steps = result['steps'] as List<dynamic>?;
+        if (steps != null) {
+          for (int i = 0; i < steps.length; i++) {
+            final step = steps[i];
+            _messages.add(
+              ChatMessage.steps(
+                stepNumber: "0${i + 1}",
+                stepTitle: step['title']?.toString() ?? "Step ${i + 1}",
+                stepDescription: step['description']?.toString() ?? "",
+                formula: step['formula']?.toString() ?? "",
+              ),
+            );
+          }
+        }
+
+        final finalAnswer = result['final_answer']?.toString();
+        if (finalAnswer != null && finalAnswer.isNotEmpty) {
+          _messages.add(
+            ChatMessage.finalResult(formula: finalAnswer),
+          );
+        }
+      }
+
+      notifyListeners();
+      _scrollToBottom();
+    } catch (e) {
       _isTyping = false;
       _messages.add(
         ChatMessage.text(
-          text: "Got it! Connect me to your AI API to solve this properly.",
+          text: "Error: Could not solve the problem. Please try again.",
           role: MessageRole.ai,
         ),
       );
       notifyListeners();
       _scrollToBottom();
-    });
+    }
   }
 
   // ── Clear all messages ────────────────────────────────────────────────────

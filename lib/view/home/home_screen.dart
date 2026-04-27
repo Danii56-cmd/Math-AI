@@ -82,7 +82,7 @@ class HomeScreen extends StatelessWidget {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                           borderSide: BorderSide(
-                            color: c.primary.withOpacity(0.5),
+                            color: c.primary.withValues(alpha: 0.5),
                           ),
                         ),
                       ),

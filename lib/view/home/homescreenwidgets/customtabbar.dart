@@ -40,10 +40,10 @@ class CustomTabBar extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 18.w),
               height: 32.h,
               decoration: BoxDecoration(
-                color: isActive ? c.primary.withOpacity(0.15) : c.card,
+                color: isActive ? c.primary.withValues(alpha: 0.15) : c.card,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: isActive ? c.primary.withOpacity(0.4) : c.border,
+                  color: isActive ? c.primary.withValues(alpha: 0.4) : c.border,
                 ),
               ),
               child: Center(

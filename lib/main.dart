@@ -57,7 +57,6 @@ class MyApp extends StatelessWidget {
               "/camera_screen": (context) => const CameraScreen(),
               "/aichatbot_screen": (context) => const AichatbotScreen(),
               "/calculator_screen": (context) => const CalculatorScreen(),
-              // "/solver_screen": (context) => const SolverScreen(imageFile: imageFile),
             },
           );
         },

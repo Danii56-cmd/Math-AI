@@ -350,7 +350,7 @@ class _CalcButton extends StatelessWidget {
       bg = const Color(0xFFFDE8E8);
       fg = const Color(0xFFE53935);
     } else if (isOperator) {
-      bg = c.primary.withOpacity(0.15);
+      bg = c.primary.withValues(alpha: 0.15);
       fg = c.primary;
     } else if (isFunction || isSpecial) {
       bg = c.iconBgMuted;

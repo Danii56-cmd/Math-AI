@@ -104,7 +104,7 @@ class AppTheme {
       ),
       trackColor: WidgetStateProperty.resolveWith(
         (s) => s.contains(WidgetState.selected)
-            ? primary.withOpacity(0.5)
+            ? primary.withValues(alpha: 0.5)
             : Colors.white24,
       ),
     ),

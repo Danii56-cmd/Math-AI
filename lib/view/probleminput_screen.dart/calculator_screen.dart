@@ -93,8 +93,8 @@ class CalculatorScreen extends StatelessWidget {
                           border: Border.all(color: c.border),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(
-                                c.isDark ? 0.3 : 0.08,
+                              color: Colors.black.withValues(
+                                alpha: c.isDark ? 0.3 : 0.08,
                               ),
                               blurRadius: 2,
                               spreadRadius: 1,
