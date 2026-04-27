@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAQJ6517MA62pJW0l-AoENvhFeXN65jWNk',
+    apiKey: 'AIzaSyBWmCIZnN9ffHNRuttdql9BDIYsB6oQMuI',
     appId: '1:482510938256:web:18852e4209712b9abe3815',
     messagingSenderId: '482510938256',
     projectId: 'math-ai-90d85',
@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC7Os9I2L9gyzD99BH-YBaxZEySVtsGGyc',
+    apiKey: 'AIzaSyB3Cer0v8PKG9-hQV2jJkfiJzfL7c6wlrc',
     appId: '1:482510938256:android:5e73eb43404429fabe3815',
     messagingSenderId: '482510938256',
     projectId: 'math-ai-90d85',
@@ -77,7 +77,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAQJ6517MA62pJW0l-AoENvhFeXN65jWNk',
+    apiKey: 'AIzaSyB3Cer0v8PKG9-hQV2jJkfiJzfL7c6wlrc',
     appId: '1:482510938256:web:c79c15c123e74605be3815',
     messagingSenderId: '482510938256',
     projectId: 'math-ai-90d85',
