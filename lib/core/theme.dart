@@ -65,10 +65,8 @@ class AppTheme {
       onTertiary: Colors.white,
       surface: secondary, // #1E293B – cards, bottom sheets
       onSurface: Colors.white,
-      background: neutral, // #0F172A – scaffold background
-      onBackground: Colors.white,
       outline: Color(0xFF334155), // subtle borders (slate-700)
-      surfaceVariant: Color(0xFF1E293B), // slightly raised surfaces
+      surfaceContainerHighest: Color(0xFF1E293B), // slightly raised surfaces
     ),
 
     scaffoldBackgroundColor: neutral, // #0F172A
@@ -101,11 +99,11 @@ class AppTheme {
     ),
 
     switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith(
-        (s) => s.contains(MaterialState.selected) ? primary : Colors.white54,
+      thumbColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? primary : Colors.white54,
       ),
-      trackColor: MaterialStateProperty.resolveWith(
-        (s) => s.contains(MaterialState.selected)
+      trackColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected)
             ? primary.withOpacity(0.5)
             : Colors.white24,
       ),

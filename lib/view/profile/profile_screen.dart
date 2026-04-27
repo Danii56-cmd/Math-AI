@@ -157,16 +157,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       trailing: Switch(
                         value: c.isDark,
-                        thumbColor: const MaterialStatePropertyAll(
+                        thumbColor: const WidgetStatePropertyAll(
                           Colors.white,
                         ),
-                        trackColor: MaterialStateProperty.resolveWith((states) {
-                          if (states.contains(MaterialState.selected)) {
+                        trackColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
                             return AppTheme.primary;
                           }
                           return c.isDark ? Colors.white24 : Colors.black26;
                         }),
-                        trackOutlineColor: const MaterialStatePropertyAll(
+                        trackOutlineColor: const WidgetStatePropertyAll(
                           Colors.transparent,
                         ),
                         onChanged: (value) {
@@ -262,16 +262,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       trailing: Switch(
                         value: profileProvider.notificationsEnabled,
                         onChanged: profileProvider.toggleNotifications,
-                        thumbColor: const MaterialStatePropertyAll(
+                        thumbColor: const WidgetStatePropertyAll(
                           Colors.white,
                         ),
-                        trackColor: MaterialStateProperty.resolveWith((states) {
-                          if (states.contains(MaterialState.selected)) {
+                        trackColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
                             return AppTheme.primary;
                           }
                           return c.isDark ? Colors.white24 : Colors.black26;
                         }),
-                        trackOutlineColor: const MaterialStatePropertyAll(
+                        trackOutlineColor: const WidgetStatePropertyAll(
                           Colors.transparent,
                         ),
                       ),
