@@ -3,8 +3,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:math_ai/core/app_constants.dart';
+import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/services/ocr_service.dart';
 import 'package:math_ai/utills/math_cleaner.dart';
@@ -21,6 +22,10 @@ class _CameraScreenState extends State<CameraScreen> {
   List<CameraDescription>? cameras;
   bool isCameraInitialized = false;
   CameraController? controller;
+  bool isFlashOn = false;
+  bool isCapturing = false;
+  String _statusText = "Align formula within the frame";
+
   @override
   void initState() {
     super.initState();
@@ -30,109 +35,188 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> initializeCamera() async {
     try {
       cameras = await availableCameras();
-
       if (cameras != null && cameras!.isNotEmpty) {
-        // Use the first available camera (usually the back one)
         controller = CameraController(
           cameras![0],
           ResolutionPreset.high,
-          enableAudio:
-              false, // Set to false if you don't need audio to avoid extra permission hits
+          enableAudio: false,
         );
-
         await controller!.initialize();
-
         if (!mounted) return;
-
-        setState(() {
-          isCameraInitialized = true;
-        });
+        setState(() => isCameraInitialized = true);
       } else {
         debugPrint("No cameras found");
       }
     } catch (e) {
       debugPrint("Camera Error: $e");
-      // You might want to show a SnackBar here to tell the user what went wrong
     }
   }
 
+  @override
   void dispose() {
     controller?.dispose();
     super.dispose();
   }
 
-  bool isFlashOn = false;
-  bool isCapturing = false;
+  // Process image after capture or gallery pick
+  Future<void> _processImage(File imageFile, AppColors c) async {
+    if (isCapturing) return;
+    try {
+      setState(() {
+        isCapturing = true;
+        _statusText = "Cropping...";
+      });
+
+      final File? croppedImage = await _cropImage(imageFile, c);
+      if (croppedImage == null) return;
+
+      setState(() => _statusText = "Reading math...");
+      final String extractedText = await OCRService.extractText(croppedImage);
+
+      setState(() => _statusText = "Processing...");
+      final String cleanedText = MathCleaner.clean(extractedText);
+
+      if (cleanedText.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text("No math detected. Try a clearer image."),
+              backgroundColor: c.bg,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!mounted) return;
+      final navProvider = Provider.of<NavigationProvider>(
+        context,
+        listen: false,
+      );
+      navProvider.setExpressionAndNavigate(cleanedText, 2, image: croppedImage);
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint("Process image error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Something went wrong: $e"),
+            backgroundColor: c.bg,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isCapturing = false;
+          _statusText = "Align formula within the frame";
+        });
+      }
+    }
+  }
+
+  // Crop image after clicking it or after picking up from gallery
+  Future<File?> _cropImage(File imageFile, AppColors c) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Math Expression',
+          toolbarColor: c.primary,
+          toolbarWidgetColor: c.surface,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+        ),
+      ],
+    );
+    return croppedFile != null ? File(croppedFile.path) : null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!isCameraInitialized)
+    final c = AppColors.of(context);
+
+    if (!isCameraInitialized) {
       return Scaffold(
-        body: Center(child: SpinKitCircle(color: AppConstants.primaryColor)),
+        backgroundColor: c.bg,
+        body: Center(child: SpinKitCircle(color: c.primary)),
       );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 1. Live Camera Preview
           SizedBox.expand(child: CameraPreview(controller!)),
 
-          // 2. Dark Overlay for focus
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withAlpha(80)),
 
-          // 3. UI Controls
+          if (isCapturing)
+            Container(
+              color: Colors.black.withAlpha(170),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SpinKitCircle(color: c.primary, size: 60),
+                    SizedBox(height: 16.h),
+                    Text(
+                      _statusText,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               child: Column(
                 children: [
-                  // Top Row: Close, Title, Flash
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildRoundButton(
                         Icons.close,
                         () => Navigator.pop(context),
+                        c,
                       ),
-                      _buildScannerTag(),
+                      _buildScannerTag(c),
                       _buildRoundButton(
                         isFlashOn ? Icons.flash_off : Icons.bolt,
-
                         () async {
-                          setState(() {
-                            isFlashOn = !isFlashOn;
-                          });
-
-                          if (isFlashOn) {
-                            await controller!.setFlashMode(FlashMode.torch);
-                          } else {
-                            await controller!.setFlashMode(FlashMode.off);
-                          }
+                          setState(() => isFlashOn = !isFlashOn);
+                          await controller!.setFlashMode(
+                            isFlashOn ? FlashMode.torch : FlashMode.off,
+                          );
                         },
+                        c,
                       ),
                     ],
                   ),
                   const Spacer(),
-
-                  // Center Frame (Scanning Area)
-                  _buildScanningFrame(),
-
+                  _buildScanningFrame(c),
                   SizedBox(height: 20.h),
                   Text(
-                    "Align formula within the frame",
+                    _statusText,
                     style: TextStyle(color: Colors.white, fontSize: 14.sp),
                   ),
-
                   const Spacer(),
-
-                  // Bottom Row: Gallery, Shutter
                   Padding(
                     padding: EdgeInsets.only(bottom: 30.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildGalleryButton(),
-                        _buildShutterButton(),
-                        SizedBox(width: 60.w), // Spacer to balance the row
+                        _buildGalleryButton(c),
+                        _buildShutterButton(c),
+                        SizedBox(width: 60.w),
                       ],
                     ),
                   ),
@@ -145,14 +229,15 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildRoundButton(IconData icon, VoidCallback onTap) {
+  Widget _buildRoundButton(IconData icon, VoidCallback onTap, AppColors c) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(10.r),
         decoration: BoxDecoration(
-          color: Colors.white24,
+          color: c.surface.withAlpha(60),
           shape: BoxShape.circle,
+          border: Border.all(color: c.border.withAlpha(120)),
         ),
         child: Icon(
           icon,
@@ -163,74 +248,74 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildScannerTag() {
+  Widget _buildScannerTag(AppColors c) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: Colors.black54,
+        color: c.surface.withAlpha(150),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: c.border),
       ),
       child: Text(
         "SCANNING MATH",
         style: TextStyle(
-          color: Colors.white,
+          color: c.primary,
           fontSize: 12.sp,
           fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
         ),
       ),
     );
   }
 
-  Widget _buildScanningFrame() {
-    return Container(
+  Widget _buildScanningFrame(AppColors c) {
+    return SizedBox(
       width: 280.w,
       height: 200.h,
       child: Stack(
         children: [
-          // Custom corners implementation
           Align(
             alignment: Alignment.topLeft,
-            child: _corner(top: true, left: true),
+            child: _corner(top: true, left: true, c: c),
           ),
           Align(
             alignment: Alignment.topRight,
-            child: _corner(top: true, left: false),
+            child: _corner(top: true, left: false, c: c),
           ),
           Align(
             alignment: Alignment.bottomLeft,
-            child: _corner(top: false, left: true),
+            child: _corner(top: false, left: true, c: c),
           ),
           Align(
             alignment: Alignment.bottomRight,
-            child: _corner(top: false, left: false),
+            child: _corner(top: false, left: false, c: c),
           ),
         ],
       ),
     );
   }
 
-  Widget _corner({required bool top, required bool left}) {
+  Widget _corner({
+    required bool top,
+    required bool left,
+    required AppColors c,
+  }) {
     return Container(
       width: 45.w,
       height: 45.h,
       decoration: BoxDecoration(
-        // Only show borders on the outer edges
         border: Border(
-          top: top
-              ? BorderSide(color: AppConstants.primaryColor, width: 4.w)
-              : BorderSide.none,
+          top: top ? BorderSide(color: c.primary, width: 4.w) : BorderSide.none,
           bottom: !top
-              ? BorderSide(color: AppConstants.primaryColor, width: 4.w)
+              ? BorderSide(color: c.primary, width: 4.w)
               : BorderSide.none,
           left: left
-              ? BorderSide(color: AppConstants.primaryColor, width: 4.w)
+              ? BorderSide(color: c.primary, width: 4.w)
               : BorderSide.none,
           right: !left
-              ? BorderSide(color: AppConstants.primaryColor, width: 4.w)
+              ? BorderSide(color: c.primary, width: 4.w)
               : BorderSide.none,
         ),
-        // Apply radius only to the specific corner to get that bracket look
         borderRadius: BorderRadius.only(
           topLeft: (top && left) ? Radius.circular(15.r) : Radius.zero,
           topRight: (top && !left) ? Radius.circular(15.r) : Radius.zero,
@@ -241,125 +326,55 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildGalleryButton() {
+  Widget _buildGalleryButton(AppColors c) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         GestureDetector(
-          onTap: () async {
-            if (isCapturing) return;
-
-            try {
-              final ImagePicker picker = ImagePicker();
-              final XFile? pickedFile = await picker.pickImage(
-                source: ImageSource.gallery,
-              );
-
-              if (pickedFile == null) return;
-
-              setState(() => isCapturing = true);
-
-              File image = File(pickedFile.path);
-
-              // 🧠 OCR
-              String extractedText = await OCRService.extractText(image);
-
-              // 🧹 Clean
-              String cleanedText = MathCleaner.clean(extractedText);
-
-              // ❌ if empty
-              if (cleanedText.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("No math detected. Try again.")),
-                );
-                return;
-              }
-
-              // 🚀 NAVIGATE (PROPER WAY)
-              final navProvider = Provider.of<NavigationProvider>(
-                context,
-                listen: false,
-              );
-
-              navProvider.setExpressionAndNavigate(
-                cleanedText,
-                2,
-                image: image,
-              );
-              if (mounted) Navigator.pop(context);
-            } catch (e) {
-              debugPrint("Gallery error: $e");
-            } finally {
-              if (mounted) setState(() => isCapturing = false);
-            }
-          },
+          onTap: isCapturing
+              ? null
+              : () async {
+                  final XFile? pickedFile = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (pickedFile == null) return;
+                  await _processImage(File(pickedFile.path), c);
+                },
           child: Container(
             padding: EdgeInsets.all(12.r),
             decoration: BoxDecoration(
-              color: Colors.white24,
+              color: c.surface.withAlpha(60),
               borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: c.border.withAlpha(120)),
             ),
             child: const Icon(Icons.photo_library, color: Colors.white),
           ),
         ),
         SizedBox(height: 5.h),
-        Text(
+        const Text(
           "GALLERY",
-          style: TextStyle(color: Colors.white, fontSize: 10.sp),
+          style: TextStyle(color: Colors.white, fontSize: 10),
         ),
       ],
     );
   }
 
-  Widget _buildShutterButton() {
+  Widget _buildShutterButton(AppColors c) {
     return GestureDetector(
-      onTap: () async {
-        if (isCapturing ||
-            controller == null ||
-            !controller!.value.isInitialized)
-          return;
-
-        try {
-          setState(() => isCapturing = true);
-
-          final XFile file = await controller!.takePicture();
-          File image = File(file.path);
-
-          // 🧠 OCR
-          String extractedText = await OCRService.extractText(image);
-
-          // 🧹 Clean
-          String cleanedText = MathCleaner.clean(extractedText);
-
-          // ❌ empty check
-          if (cleanedText.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("No math detected. Try again.")),
-            );
-            return;
-          }
-
-          // 🔥 NAVIGATE TO SOLVER
-          final navProvider = Provider.of<NavigationProvider>(
-            context,
-            listen: false,
-          );
-
-          navProvider.setExpressionAndNavigate(cleanedText, 2, image: image);
-          if (mounted) Navigator.pop(context);
-        } catch (e) {
-          debugPrint("Camera capture error: $e");
-        } finally {
-          if (mounted) setState(() => isCapturing = false);
-        }
-      },
-
+      onTap: isCapturing
+          ? null
+          : () async {
+              if (controller == null || !controller!.value.isInitialized)
+                return;
+              final XFile file = await controller!.takePicture();
+              await _processImage(File(file.path), c);
+            },
       child: isCapturing
-          ? SpinKitCircle(color: Colors.white, size: 50)
+          ? const SpinKitCircle(color: Colors.white, size: 50)
           : Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4.w),
+                border: Border.all(color: Colors.white, width: 4),
               ),
               child: Container(
                 height: 60.r,
@@ -369,7 +384,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.document_scanner, color: Colors.blue),
+                child: Icon(Icons.document_scanner, color: c.primary),
               ),
             ),
     );

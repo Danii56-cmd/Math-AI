@@ -125,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   border: Border.all(color: c.border),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(c.isDark ? 0.3 : 0.08),
+                      color: Colors.black.withValues(alpha: c.isDark ? 0.3 : 0.08),
                       blurRadius: 2,
                       spreadRadius: 1,
                       offset: const Offset(0, 2),
@@ -229,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   border: Border.all(color: c.border),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(c.isDark ? 0.3 : 0.08),
+                      color: Colors.black.withValues(alpha: c.isDark ? 0.3 : 0.08),
                       blurRadius: 2,
                       spreadRadius: 1,
                       offset: const Offset(0, 2),
@@ -339,13 +339,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Icon(
                           Icons.delete_forever_outlined,
-                          color: const Color(0xFFA83836).withOpacity(0.7),
+                          color: const Color(0xFFA83836).withValues(alpha: 0.7),
                         ),
                         SizedBox(width: 5.w),
                         Text(
                           "Delete Account",
                           style: TextStyle(
-                            color: const Color(0xFFA83836).withOpacity(0.7),
+                            color: const Color(0xFFA83836).withValues(alpha: 0.7),
                           ),
                         ),
                       ],

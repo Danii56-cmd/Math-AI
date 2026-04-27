@@ -17,7 +17,7 @@ class HistoryScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: c.bg,
         elevation: 0.7,
-        shadowColor: c.subtitle.withOpacity(0.1),
+        shadowColor: c.subtitle.withValues(alpha: 0.1),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_rounded, color: c.primary),
           onPressed: () {
@@ -118,7 +118,7 @@ class HistoryScreen extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: c.primary.withOpacity(0.3)),
+              borderSide: BorderSide(color: c.primary.withValues(alpha: 0.3)),
             ),
           ),
         );
@@ -234,7 +234,7 @@ class HistoryItemCard extends StatelessWidget {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 8,
                   spreadRadius: 1,
                   offset: const Offset(0, 2),
@@ -266,8 +266,8 @@ class HistoryItemCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(
                         color: c.isDark
-                            ? c.primary.withOpacity(0.4)
-                            : Colors.grey.withOpacity(0.35),
+                            ? c.primary.withValues(alpha: 0.4)
+                            : Colors.grey.withValues(alpha: 0.35),
                       ),
                     ),
                     child: Text(

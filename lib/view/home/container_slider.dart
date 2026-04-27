@@ -78,7 +78,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
                               end: Alignment.bottomRight,
                               colors: [
                                 // Primary blue: Maps to rgba(0, 97, 164, 1) with 0.8 opacity
-                                AppConstants.primaryColor.withOpacity(0.8),
+                                AppConstants.primaryColor.withValues(alpha: 0.8),
                                 // Secondary purple: Maps to rgba(111, 72, 178, 1) with 0.7 opacity
                                 const Color.fromARGB(179, 149, 87, 255),
                               ],

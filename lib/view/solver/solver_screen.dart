@@ -86,6 +86,10 @@ class _SolverScreenState extends State<SolverScreen> {
             icon: Icon(Icons.share_rounded, color: c.iconColor),
             onPressed: () {},
           ),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: c.iconColor),
+            onPressed: () {},
+          ),
         ],
       ),
 
@@ -170,7 +174,7 @@ class _SolverScreenState extends State<SolverScreen> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [c.primary.withOpacity(0.1), c.surface],
+                        colors: [c.primary.withValues(alpha: 0.1), c.surface],
                         stops: const [0.0, 0.025],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
@@ -281,13 +285,15 @@ class _SolverScreenState extends State<SolverScreen> {
                         SizedBox(height: 10.h),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16.w),
-                          child: Text(
-                            _finalAnswer,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: c.primary,
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w500,
+                          child: Expanded(
+                            child: Text(
+                              _finalAnswer,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: c.primary,
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
@@ -368,7 +374,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
               style: TextStyle(
                 fontSize: 40.sp,
                 fontWeight: FontWeight.bold,
-                color: c.subtitle.withOpacity(0.1),
+                color: c.subtitle.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -390,7 +396,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: c.primary.withOpacity(0.3),
+                            color: c.primary.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),

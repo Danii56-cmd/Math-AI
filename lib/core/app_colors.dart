@@ -1,5 +1,3 @@
-// lib/core/app_colors.dart
-
 import 'package:flutter/material.dart';
 import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/core/theme.dart';
