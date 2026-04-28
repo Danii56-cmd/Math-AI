@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:math_ai/controllers/math_controller.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/services/gemini_service.dart';
 import 'package:provider/provider.dart';
 
 class SolverScreen extends StatefulWidget {
@@ -17,29 +17,56 @@ class SolverScreen extends StatefulWidget {
 class _SolverScreenState extends State<SolverScreen> {
   bool _isLoading = true;
   String _errorMessage = "";
+  String _interpretedProblem = "";
   List<dynamic> _steps = [];
   String _finalAnswer = "";
 
   @override
   void initState() {
     super.initState();
-    _callGemini(); // 🔥 auto call when screen opens
+    _solve();
   }
 
-  Future<void> _callGemini() async {
+  Future<void> _solve() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = "";
+    });
+
     try {
-      final result = await GeminiService.solveMath(widget.expression);
+      final navProvider = Provider.of<NavigationProvider>(
+        context,
+        listen: false,
+      );
+      final imageFile = navProvider.capturedImage;
+
+      Map<String, dynamic> result;
+
+      if (imageFile != null) {
+        // ✅ Image available — send directly to Gemini Vision
+        result = await MathController.solveFromImage(imageFile);
+      } else if (widget.expression.isNotEmpty) {
+        // ✅ Text expression — send as text
+        result = await MathController.solveFromText(widget.expression);
+      } else {
+        setState(() {
+          _errorMessage = "No image or expression provided.";
+          _isLoading = false;
+        });
+        return;
+      }
 
       if (!mounted) return;
 
       setState(() {
-        _steps = result['steps'] ?? [];
-        _finalAnswer = result['final_answer'] ?? "No answer returned";
+        _interpretedProblem = result['interpreted_problem']?.toString() ?? "";
+        _steps = result['steps'] as List<dynamic>? ?? [];
+        _finalAnswer =
+            result['final_answer']?.toString() ?? "No answer returned";
         _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
         _errorMessage = "Failed to solve: $e";
         _isLoading = false;
@@ -76,11 +103,10 @@ class _SolverScreenState extends State<SolverScreen> {
           ),
         ),
         actions: [
-          // Retry button in case of error
           if (_errorMessage.isNotEmpty)
             IconButton(
               icon: Icon(Icons.refresh, color: c.iconColor),
-              onPressed: _callGemini,
+              onPressed: _solve,
             ),
           IconButton(
             icon: Icon(Icons.share_rounded, color: c.iconColor),
@@ -94,7 +120,7 @@ class _SolverScreenState extends State<SolverScreen> {
       ),
 
       body: _isLoading
-          // ── Loading State ──
+          // ── Loading ──────────────────────────────────────────────
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -108,7 +134,7 @@ class _SolverScreenState extends State<SolverScreen> {
                 ],
               ),
             )
-          // ── Error State ──
+          // ── Error ─────────────────────────────────────────────────
           : _errorMessage.isNotEmpty
           ? Center(
               child: Padding(
@@ -125,21 +151,21 @@ class _SolverScreenState extends State<SolverScreen> {
                     ),
                     SizedBox(height: 24.h),
                     ElevatedButton.icon(
-                      onPressed: _callGemini,
-                      icon: Icon(Icons.refresh),
-                      label: Text("Try Again"),
+                      onPressed: _solve,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Try Again"),
                     ),
                   ],
                 ),
               ),
             )
-          // ── Result State ──
+          // ── Result ────────────────────────────────────────────────
           : SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Captured Image
+                  // ── Captured Image ──────────────────────────────
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 20.h),
                     height: 180.h,
@@ -151,7 +177,7 @@ class _SolverScreenState extends State<SolverScreen> {
                                 context,
                                 "/camera_screen",
                               ),
-                              child: Text("No Image — tap to pick one"),
+                              child: const Text("No Image — tap to pick one"),
                             ),
                           )
                         : ClipRRect(
@@ -160,38 +186,38 @@ class _SolverScreenState extends State<SolverScreen> {
                           ),
                   ),
 
-                  // Extracted Problem
-                  Text(
-                    "Captured Problem",
-                    style: TextStyle(color: c.primary, fontSize: 14.sp),
-                  ),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 12.h),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.w,
-                      vertical: 16.h,
+                  // ── Interpreted Problem ─────────────────────────
+                  if (_interpretedProblem.isNotEmpty) ...[
+                    Text(
+                      "Interpreted Problem",
+                      style: TextStyle(color: c.primary, fontSize: 14.sp),
                     ),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [c.primary.withValues(alpha: 0.1), c.surface],
-                        stops: const [0.0, 0.025],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 16.h,
                       ),
-                      borderRadius: BorderRadius.circular(20.r),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [c.primary.withValues(alpha: 0.1), c.surface],
+                          stops: const [0.0, 0.025],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Text(
+                        _interpretedProblem,
+                        style: TextStyle(color: c.title, fontSize: 16.sp),
+                      ),
                     ),
-                    child: Text(
-                      widget.expression.isEmpty
-                          ? "No expression"
-                          : widget.expression,
-                      style: TextStyle(color: c.title, fontSize: 16.sp),
-                    ),
-                  ),
+                  ],
 
                   SizedBox(height: 10.h),
 
-                  // Steps Header
+                  // ── Steps Header ─────────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -213,6 +239,7 @@ class _SolverScreenState extends State<SolverScreen> {
                         ),
                         child: Text(
                           "Gemini\nFlash",
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             color: c.subtitle,
                             fontSize: 12,
@@ -225,45 +252,54 @@ class _SolverScreenState extends State<SolverScreen> {
 
                   SizedBox(height: 20.h),
 
-                  // Dynamic Steps from Gemini
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _steps.length,
-                    itemBuilder: (context, index) {
-                      final step = _steps[index];
-                      return SolverScreenStepsContainer(
-                        stepNumber: index,
-                        title: step['title'] ?? "",
-                        description: step['description'] ?? "",
-                        formula: step['formula'] ?? "",
-                      );
-                    },
-                  ),
+                  // ── Steps List ───────────────────────────────────
+                  if (_steps.isEmpty)
+                    Center(
+                      child: Text(
+                        "No steps returned.",
+                        style: TextStyle(color: c.subtitle, fontSize: 13.sp),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _steps.length,
+                      itemBuilder: (context, index) {
+                        final step = _steps[index] as Map<String, dynamic>;
+                        return SolverScreenStepsContainer(
+                          stepNumber: index,
+                          title: step['title']?.toString() ?? "",
+                          description: step['description']?.toString() ?? "",
+                          formula: step['formula']?.toString() ?? "",
+                        );
+                      },
+                    ),
 
-                  // Final Answer Box
+                  // ── Final Answer ─────────────────────────────────
                   Container(
                     margin: EdgeInsets.symmetric(
                       horizontal: 10.w,
                       vertical: 20.h,
                     ),
-                    height: 130.h,
                     width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      vertical: 24.h,
+                      horizontal: 16.w,
+                    ),
                     decoration: BoxDecoration(
                       color: c.surface,
                       borderRadius: BorderRadius.circular(20.r),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
-                          color: const Color.fromARGB(60, 104, 171, 255),
+                          color: Color.fromARGB(60, 104, 171, 255),
                           blurRadius: 1,
                           spreadRadius: 1,
-                          offset: const Offset(0, 1),
+                          offset: Offset(0, 1),
                         ),
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
                           height: 25.r,
@@ -277,31 +313,27 @@ class _SolverScreenState extends State<SolverScreen> {
                             "FINAL ANSWER",
                             style: TextStyle(
                               color: c.surface,
-                              fontSize: 08.sp,
+                              fontSize: 8.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         SizedBox(height: 10.h),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.w),
-                          child: Expanded(
-                            child: Text(
-                              _finalAnswer,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: c.primary,
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                        // ✅ Fixed: Removed broken Expanded inside Column
+                        Text(
+                          _finalAnswer,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: c.primary,
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Action Buttons
+                  // ── Action Buttons ───────────────────────────────
                   SolverAIContainer(
                     color: c.surface,
                     text: "Explain More",
@@ -337,7 +369,7 @@ class _SolverScreenState extends State<SolverScreen> {
   }
 }
 
-// ── Steps Card ──────────────────────────────────────────────
+// ── Steps Card ────────────────────────────────────────────────────────────────
 
 class SolverScreenStepsContainer extends StatelessWidget {
   final int stepNumber;
@@ -413,7 +445,6 @@ class SolverScreenStepsContainer extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 15.w),
-                    // Title
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(top: 8.h),
@@ -432,7 +463,6 @@ class SolverScreenStepsContainer extends StatelessWidget {
 
                 SizedBox(height: 15.h),
 
-                // Description
                 Padding(
                   padding: EdgeInsets.only(left: 55.w),
                   child: Text(
@@ -445,7 +475,6 @@ class SolverScreenStepsContainer extends StatelessWidget {
                   ),
                 ),
 
-                // Formula (only show if not empty)
                 if (formula.isNotEmpty) ...[
                   SizedBox(height: 12.h),
                   Container(
@@ -477,7 +506,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
   }
 }
 
-// ── Action Button ─────────────────────────────────────────
+// ── Action Button ─────────────────────────────────────────────────────────────
 
 class SolverAIContainer extends StatelessWidget {
   final String text;
