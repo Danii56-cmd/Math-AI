@@ -31,12 +31,20 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   // ✅ Add this method to NavigationProvider
-  void setExpressionAndNavigate(String expression, int index, {File? image}) {
+  void setExpressionAndNavigate(
+    String expression,
+    int pageIndex, {
+    File? image,
+    String? rawOcrText, // 👈 add this
+  }) {
     _expression = expression;
-    _selectedIndex = index;
-    if (image != null) {
-      _capturedImage = image;
-    }
+    _rawOcrText = rawOcrText; // 👈 store it
+    _capturedImage = image;
+    _selectedIndex = pageIndex;
     notifyListeners();
   }
+
+  // Add field:
+  String? _rawOcrText;
+  String? get rawOcrText => _rawOcrText;
 }

@@ -1,5 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../services/gemini_service.dart';
+import 'package:math_ai/controllers/math_controller.dart';
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 enum MessageRole { user, ai }
@@ -12,13 +13,11 @@ class ChatMessage {
   final MessageRole role;
   final MessageContentType contentType;
 
-  // Only used when contentType == steps
   final String? stepNumber;
   final String? stepTitle;
   final String? stepDescription;
   final String? formula;
 
-  // Plain text bubble (user or ai)
   ChatMessage.text({required this.text, required this.role})
     : contentType = MessageContentType.text,
       stepNumber = null,
@@ -26,7 +25,6 @@ class ChatMessage {
       stepDescription = null,
       formula = null;
 
-  // Step card bubble
   ChatMessage.steps({
     required this.stepNumber,
     required this.stepTitle,
@@ -36,7 +34,6 @@ class ChatMessage {
        role = MessageRole.ai,
        contentType = MessageContentType.steps;
 
-  // Final result card
   ChatMessage.finalResult({required this.formula})
     : text = '',
       role = MessageRole.ai,
@@ -53,42 +50,34 @@ class AiChatProvider with ChangeNotifier {
 
   bool _isTyping = false;
   bool get isTyping => _isTyping;
-
   bool get isEmpty => _messages.isEmpty;
 
-  // Pre-populated demo messages — matches your original hardcoded screen
-  final List<ChatMessage> _messages = [
-    ChatMessage.text(
-      text: "Find the derivative of f(x) =\nx³ + 2x",
-      role: MessageRole.user,
-    ),
-    ChatMessage.text(
-      text: "Hello! I'd be happy to help...",
-      role: MessageRole.ai,
-    ),
-    ChatMessage.steps(
-      stepNumber: "01",
-      stepTitle: "The Power Rule",
-      stepDescription: "The derivative of xⁿ is n·xⁿ⁻¹.",
-      formula: "d/dx [xⁿ] = nxⁿ⁻¹",
-    ),
-    ChatMessage.steps(
-      stepNumber: "02",
-      stepTitle: "Apply to each term",
-      stepDescription: "We calculate each part separately.",
-      formula: "3x² + 2",
-    ),
-    ChatMessage.finalResult(formula: "f'(x) = 3x² + 2"),
-  ];
-
+  final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  // ── Send user message ───────────────────────────────────────────────────────
+  // ── Called from solution screen when image is passed from camera ────────────
+  Future<void> solveFromImage(File imageFile) async {
+    // Show user thumbnail message
+    _messages.add(
+      ChatMessage.text(text: "Solving from image...", role: MessageRole.user),
+    );
+    _isTyping = true;
+    notifyListeners();
+    _scrollToBottom();
+
+    try {
+      final result = await MathController.solveFromImage(imageFile);
+      _handleResult(result);
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+  // ── Called when user types a message ───────────────────────────────────────
   Future<void> sendMessage() async {
     final text = controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isTyping) return;
 
-    // Add user message
     _messages.add(ChatMessage.text(text: text, role: MessageRole.user));
     controller.clear();
     _isTyping = true;
@@ -96,55 +85,64 @@ class AiChatProvider with ChangeNotifier {
     _scrollToBottom();
 
     try {
-      final result = await GeminiService.solveMath(text);
-
-      _isTyping = false;
-
-      final isMathProblem = result['is_math_problem'] as bool? ?? true;
-
-      if (!isMathProblem) {
-        final textReply = result['text_reply']?.toString() ?? "I didn't quite get that.";
-        _messages.add(ChatMessage.text(text: textReply, role: MessageRole.ai));
-      } else {
-        final steps = result['steps'] as List<dynamic>?;
-        if (steps != null) {
-          for (int i = 0; i < steps.length; i++) {
-            final step = steps[i];
-            _messages.add(
-              ChatMessage.steps(
-                stepNumber: "0${i + 1}",
-                stepTitle: step['title']?.toString() ?? "Step ${i + 1}",
-                stepDescription: step['description']?.toString() ?? "",
-                formula: step['formula']?.toString() ?? "",
-              ),
-            );
-          }
-        }
-
-        final finalAnswer = result['final_answer']?.toString();
-        if (finalAnswer != null && finalAnswer.isNotEmpty) {
-          _messages.add(
-            ChatMessage.finalResult(formula: finalAnswer),
-          );
-        }
-      }
-
-      notifyListeners();
-      _scrollToBottom();
+      final result = await MathController.solveFromText(text);
+      _handleResult(result);
     } catch (e) {
-      _isTyping = false;
-      _messages.add(
-        ChatMessage.text(
-          text: "Error: Could not solve the problem. Please try again.",
-          role: MessageRole.ai,
-        ),
-      );
-      notifyListeners();
-      _scrollToBottom();
+      _handleError(e);
     }
   }
 
-  // ── Clear all messages ────────────────────────────────────────────────────
+  // ── Shared result handler ──────────────────────────────────────────────────
+  void _handleResult(Map<String, dynamic> result) {
+    _isTyping = false;
+
+    // Show how Gemini interpreted the problem
+    final interpreted = result['interpreted_problem']?.toString();
+    if (interpreted != null && interpreted.isNotEmpty) {
+      _messages.add(
+        ChatMessage.text(text: "I see: $interpreted", role: MessageRole.ai),
+      );
+    }
+
+    // Show each step
+    final steps = result['steps'] as List<dynamic>?;
+    if (steps != null && steps.isNotEmpty) {
+      for (int i = 0; i < steps.length; i++) {
+        final step = steps[i] as Map<String, dynamic>;
+        _messages.add(
+          ChatMessage.steps(
+            stepNumber: (i + 1).toString().padLeft(2, '0'),
+            stepTitle: step['title']?.toString() ?? "Step ${i + 1}",
+            stepDescription: step['description']?.toString() ?? "",
+            formula: step['formula']?.toString() ?? "",
+          ),
+        );
+      }
+    }
+
+    // Show final answer
+    final finalAnswer = result['final_answer']?.toString();
+    if (finalAnswer != null && finalAnswer.isNotEmpty) {
+      _messages.add(ChatMessage.finalResult(formula: finalAnswer));
+    }
+
+    notifyListeners();
+    _scrollToBottom();
+  }
+
+  void _handleError(Object e) {
+    _isTyping = false;
+    _messages.add(
+      ChatMessage.text(
+        text: "Could not solve the problem. Please try again.\n$e",
+        role: MessageRole.ai,
+      ),
+    );
+    notifyListeners();
+    _scrollToBottom();
+  }
+
+  // ── Utilities ──────────────────────────────────────────────────────────────
   void clearChat() {
     _messages.clear();
     controller.clear();

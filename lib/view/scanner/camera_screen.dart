@@ -7,8 +7,6 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/services/ocr_service.dart';
-import 'package:math_ai/utills/math_cleaner.dart';
 import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -29,16 +27,16 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    initializeCamera();
+    _initializeCamera();
   }
 
-  Future<void> initializeCamera() async {
+  Future<void> _initializeCamera() async {
     try {
       cameras = await availableCameras();
       if (cameras != null && cameras!.isNotEmpty) {
         controller = CameraController(
           cameras![0],
-          ResolutionPreset.high,
+          ResolutionPreset.max,
           enableAudio: false,
         );
         await controller!.initialize();
@@ -58,9 +56,9 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
-  // Process image after capture or gallery pick
   Future<void> _processImage(File imageFile, AppColors c) async {
     if (isCapturing) return;
+
     try {
       setState(() {
         isCapturing = true;
@@ -68,43 +66,41 @@ class _CameraScreenState extends State<CameraScreen> {
       });
 
       final File? croppedImage = await _cropImage(imageFile, c);
-      if (croppedImage == null) return;
-
-      setState(() => _statusText = "Reading math...");
-      final String extractedText = await OCRService.extractText(croppedImage);
-
-      setState(() => _statusText = "Processing...");
-      final String cleanedText = MathCleaner.clean(extractedText);
-
-      if (cleanedText.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text("No math detected. Try a clearer image."),
-              backgroundColor: c.bg,
-            ),
-          );
-        }
+      if (croppedImage == null) {
+        setState(() {
+          isCapturing = false;
+          _statusText = "Align formula within the frame";
+        });
         return;
       }
 
+      // ✅ Send image directly to Gemini Vision — no OCR, no MathCleaner
+      setState(() => _statusText = "Solving...");
+
       if (!mounted) return;
+
       final navProvider = Provider.of<NavigationProvider>(
         context,
         listen: false,
       );
-      navProvider.setExpressionAndNavigate(cleanedText, 2, image: croppedImage);
+
+      // Pass the cropped image directly — Gemini reads it
+      navProvider.setExpressionAndNavigate(
+        "", // No pre-cleaned expression needed
+        2,
+        image: croppedImage,
+      );
+
       Navigator.pop(context);
     } catch (e) {
       debugPrint("Process image error: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Something went wrong: $e"),
-            backgroundColor: c.bg,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Something went wrong: $e"),
+          backgroundColor: c.bg,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -115,7 +111,6 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  // Crop image after clicking it or after picking up from gallery
   Future<File?> _cropImage(File imageFile, AppColors c) async {
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: imageFile.path,
@@ -150,9 +145,9 @@ class _CameraScreenState extends State<CameraScreen> {
       body: Stack(
         children: [
           SizedBox.expand(child: CameraPreview(controller!)),
-
           Container(color: Colors.black.withAlpha(80)),
 
+          // Processing overlay
           if (isCapturing)
             Container(
               color: Colors.black.withAlpha(170),
@@ -180,6 +175,7 @@ class _CameraScreenState extends State<CameraScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               child: Column(
                 children: [
+                  // Top bar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -201,14 +197,20 @@ class _CameraScreenState extends State<CameraScreen> {
                       ),
                     ],
                   ),
+
                   const Spacer(),
+
+                  // Scanning frame
                   _buildScanningFrame(c),
                   SizedBox(height: 20.h),
                   Text(
                     _statusText,
                     style: TextStyle(color: Colors.white, fontSize: 14.sp),
                   ),
+
                   const Spacer(),
+
+                  // Bottom controls
                   Padding(
                     padding: EdgeInsets.only(bottom: 30.h),
                     child: Row(
@@ -364,8 +366,9 @@ class _CameraScreenState extends State<CameraScreen> {
       onTap: isCapturing
           ? null
           : () async {
-              if (controller == null || !controller!.value.isInitialized)
+              if (controller == null || !controller!.value.isInitialized) {
                 return;
+              }
               final XFile file = await controller!.takePicture();
               await _processImage(File(file.path), c);
             },

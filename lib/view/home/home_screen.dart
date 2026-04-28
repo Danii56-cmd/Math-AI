@@ -104,16 +104,10 @@ class HomeScreen extends StatelessWidget {
                   height: 50,
                   child: Consumer<HomeProvider>(
                     builder: (context, provider, child) {
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 5,
-                        itemBuilder: (context, index) {
-                          return CustomTabBar(
-                            selectedIndex: provider.selectedTabIndex,
-                            onTabChanged: (index) =>
-                                context.read<HomeProvider>().changeTab(index),
-                          );
-                        },
+                      return CustomTabBar(
+                        selectedIndex: provider.selectedTabIndex,
+                        onTabChanged: (index) =>
+                            context.read<HomeProvider>().changeTab(index),
                       );
                     },
                   ),
@@ -123,22 +117,30 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 10.h),
 
               // ── View All ─────────────────────────────────────────────────
-              Container(
-                margin: const EdgeInsets.only(left: 310),
-                alignment: Alignment.center,
-                height: 35,
-                width: 75,
-                decoration: BoxDecoration(
-                  color: c.card,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: c.border),
-                ),
-                child: Text(
-                  "View All",
-                  style: TextStyle(
-                    color: c.subtitle,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  Provider.of<NavigationProvider>(
+                    context,
+                    listen: false,
+                  ).changeIndex(1);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(left: 310),
+                  alignment: Alignment.center,
+                  height: 35,
+                  width: 75,
+                  decoration: BoxDecoration(
+                    color: c.card,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: c.border),
+                  ),
+                  child: Text(
+                    "View All",
+                    style: TextStyle(
+                      color: c.subtitle,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
