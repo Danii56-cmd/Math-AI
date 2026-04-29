@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:provider/provider.dart';
 
 class HistoryScreen extends StatelessWidget {
@@ -12,86 +13,88 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
 
-    return Scaffold(
-      backgroundColor: c.bg,
-      appBar: AppBar(
+    return CustomPopScope(
+      child: Scaffold(
         backgroundColor: c.bg,
-        elevation: 0.7,
-        shadowColor: c.subtitle.withValues(alpha: 0.1),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: c.primary),
-          onPressed: () {
-            final navProvider = Provider.of<NavigationProvider>(
-              context,
-              listen: false,
-            );
-            navProvider.changeIndex(0);
-          },
+        appBar: AppBar(
+          backgroundColor: c.bg,
+          elevation: 0.7,
+          shadowColor: c.subtitle.withValues(alpha: 0.1),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded, color: c.primary),
+            onPressed: () {
+              final navProvider = Provider.of<NavigationProvider>(
+                context,
+                listen: false,
+              );
+              navProvider.changeIndex(0);
+            },
+          ),
+          title: Text(
+            "Math Ai",
+            style: TextStyle(
+              color: c.primary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.share_rounded, color: c.primary),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(Icons.more_vert_rounded, color: c.primary),
+              onPressed: () {},
+            ),
+          ],
         ),
-        title: Text(
-          "Math Ai",
-          style: TextStyle(
-            color: c.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.share_rounded, color: c.primary),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert_rounded, color: c.primary),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Consumer<HistoryProvider>(
-              builder: (context, provider, child) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 20.h),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Consumer<HistoryProvider>(
+                builder: (context, provider, child) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20.h),
 
-                    _buildSearchBar(context, c),
-                    SizedBox(height: 20.h),
+                      _buildSearchBar(context, c),
+                      SizedBox(height: 20.h),
 
-                    _buildFilterChips(context, c),
-                    SizedBox(height: 30.h),
+                      _buildFilterChips(context, c),
+                      SizedBox(height: 30.h),
 
-                    // 🔥 TODAY FROM PROVIDER
-                    _sectionHeader("TODAY", context, c),
-                    ...provider.todayItems.map((item) {
-                      return HistoryItemCard(
-                        time: item["time"],
-                        tag: item["tag"],
-                        problem: item["problem"],
-                        solution: item["solution"],
-                        isFinal: item["isFinal"],
-                      );
-                    }),
+                      // 🔥 TODAY FROM PROVIDER
+                      _sectionHeader("TODAY", context, c),
+                      ...provider.todayItems.map((item) {
+                        return HistoryItemCard(
+                          time: item["time"],
+                          tag: item["tag"],
+                          problem: item["problem"],
+                          solution: item["solution"],
+                          isFinal: item["isFinal"],
+                        );
+                      }),
 
-                    // 🔥 YESTERDAY FROM PROVIDER
-                    _sectionHeader("YESTERDAY", context, c),
-                    ...provider.yesterdayItems.map((item) {
-                      return HistoryItemCard(
-                        time: item["time"],
-                        tag: item["tag"],
-                        problem: item["problem"],
-                        solution: item["solution"],
-                        isFinal: item["isFinal"],
-                      );
-                    }),
+                      // 🔥 YESTERDAY FROM PROVIDER
+                      _sectionHeader("YESTERDAY", context, c),
+                      ...provider.yesterdayItems.map((item) {
+                        return HistoryItemCard(
+                          time: item["time"],
+                          tag: item["tag"],
+                          problem: item["problem"],
+                          solution: item["solution"],
+                          isFinal: item["isFinal"],
+                        );
+                      }),
 
-                    SizedBox(height: 20.h),
-                  ],
-                );
-              },
+                      SizedBox(height: 20.h),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

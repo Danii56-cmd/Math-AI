@@ -85,13 +85,10 @@ class _CameraScreenState extends State<CameraScreen> {
       );
 
       // Pass the cropped image directly — Gemini reads it
-      navProvider.setExpressionAndNavigate(
-        "", // No pre-cleaned expression needed
-        2,
-        image: croppedImage,
-      );
+      navProvider.setImageAndNavigate(croppedImage, 2);
 
-      Navigator.pop(context);
+      Navigator.popUntil(context, (route) => route.isFirst);
+      navProvider.changeIndex(2);
     } catch (e) {
       debugPrint("Process image error: $e");
       if (!mounted) return;
