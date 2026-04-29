@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:math_ai/controllers/math_controller.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:provider/provider.dart';
 
 class SolverScreen extends StatefulWidget {
@@ -43,11 +44,12 @@ class _SolverScreenState extends State<SolverScreen> {
       Map<String, dynamic> result;
 
       if (imageFile != null) {
-        // ✅ Image available — send directly to Gemini Vision
+        // Image available — send directly to Gemini Vision
         result = await MathController.solveFromImage(imageFile);
-      } else if (widget.expression.isNotEmpty) {
-        // ✅ Text expression — send as text
-        result = await MathController.solveFromText(widget.expression);
+      } else if (navProvider.expression != null &&
+          navProvider.expression!.isNotEmpty) {
+        // Text expression — send as text
+        result = await MathController.solveFromText(navProvider.expression!);
       } else {
         setState(() {
           _errorMessage = "No image or expression provided.";
@@ -80,291 +82,302 @@ class _SolverScreenState extends State<SolverScreen> {
     final navProvider = Provider.of<NavigationProvider>(context);
     final imageFile = navProvider.capturedImage;
 
-    return Scaffold(
-      backgroundColor: c.bg,
-      appBar: AppBar(
-        backgroundColor: c.surface,
-        shadowColor: c.border,
-        elevation: 0.7,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: c.iconColor),
-          onPressed: () {
-            final nav = Provider.of<NavigationProvider>(context, listen: false);
-            nav.changeIndex(0);
-            nav.clearImage();
-          },
-        ),
-        title: Text(
-          "Math AI",
-          style: TextStyle(
-            color: c.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+    return CustomPopScope(
+      child: Scaffold(
+        backgroundColor: c.bg,
+        appBar: AppBar(
+          backgroundColor: c.surface,
+          shadowColor: c.border,
+          elevation: 0.7,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded, color: c.iconColor),
+            onPressed: () {
+              final nav = Provider.of<NavigationProvider>(
+                context,
+                listen: false,
+              );
+              // nav.changeIndex(0);
+              nav.clearImage();
+              nav.setExpressionAndNavigate("", 0, image: null);
+              // Navigator.pop(context);
+              nav.changeIndex(0);
+            },
           ),
-        ),
-        actions: [
-          if (_errorMessage.isNotEmpty)
-            IconButton(
-              icon: Icon(Icons.refresh, color: c.iconColor),
-              onPressed: _solve,
+          title: Text(
+            "Math AI",
+            style: TextStyle(
+              color: c.primary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-          IconButton(
-            icon: Icon(Icons.share_rounded, color: c.iconColor),
-            onPressed: () {},
           ),
-          IconButton(
-            icon: Icon(Icons.more_vert, color: c.iconColor),
-            onPressed: () {},
-          ),
-        ],
-      ),
-
-      body: _isLoading
-          // ── Loading ──────────────────────────────────────────────
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SpinKitCircle(color: c.primary),
-                  SizedBox(height: 20.h),
-                  Text(
-                    "Solving your problem...",
-                    style: TextStyle(color: c.subtitle, fontSize: 14.sp),
-                  ),
-                ],
+          actions: [
+            if (_errorMessage.isNotEmpty)
+              IconButton(
+                icon: Icon(Icons.refresh, color: c.iconColor),
+                onPressed: _solve,
               ),
-            )
-          // ── Error ─────────────────────────────────────────────────
-          : _errorMessage.isNotEmpty
-          ? Center(
-              child: Padding(
-                padding: EdgeInsets.all(24.r),
+            IconButton(
+              icon: Icon(Icons.share_rounded, color: c.iconColor),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(Icons.more_vert, color: c.iconColor),
+              onPressed: () {},
+            ),
+          ],
+        ),
+
+        body: _isLoading
+            // ── Loading ──────────────────────────────────────────────
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red, size: 48.sp),
-                    SizedBox(height: 16.h),
+                    SpinKitCircle(color: c.primary),
+                    SizedBox(height: 20.h),
                     Text(
-                      _errorMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: c.subtitle, fontSize: 13.sp),
-                    ),
-                    SizedBox(height: 24.h),
-                    ElevatedButton.icon(
-                      onPressed: _solve,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text("Try Again"),
+                      "Solving your problem...",
+                      style: TextStyle(color: c.subtitle, fontSize: 14.sp),
                     ),
                   ],
                 ),
-              ),
-            )
-          // ── Result ────────────────────────────────────────────────
-          : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Captured Image ──────────────────────────────
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 20.h),
-                    height: 180.h,
-                    width: double.infinity,
-                    child: imageFile == null
-                        ? Center(
-                            child: TextButton(
-                              onPressed: () => Navigator.pushNamed(
-                                context,
-                                "/camera_screen",
-                              ),
-                              child: const Text("No Image — tap to pick one"),
-                            ),
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(20.r),
-                            child: Image.file(imageFile, fit: BoxFit.cover),
-                          ),
-                  ),
-
-                  // ── Interpreted Problem ─────────────────────────
-                  if (_interpretedProblem.isNotEmpty) ...[
-                    Text(
-                      "Interpreted Problem",
-                      style: TextStyle(color: c.primary, fontSize: 14.sp),
-                    ),
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 12.h),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 16.h,
-                      ),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [c.primary.withValues(alpha: 0.1), c.surface],
-                          stops: const [0.0, 0.025],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        _interpretedProblem,
-                        style: TextStyle(color: c.title, fontSize: 16.sp),
-                      ),
-                    ),
-                  ],
-
-                  SizedBox(height: 10.h),
-
-                  // ── Steps Header ─────────────────────────────────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              )
+            // ── Error ─────────────────────────────────────────────────
+            : _errorMessage.isNotEmpty
+            ? Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.r),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 48.sp),
+                      SizedBox(height: 16.h),
                       Text(
-                        "Step-by-Step\nBreakdown",
-                        style: TextStyle(
-                          color: c.title,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: c.subtitle, fontSize: 13.sp),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        height: 42,
-                        width: 90,
-                        decoration: BoxDecoration(
-                          color: c.surfaceVariant,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          "Gemini\nFlash",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: c.subtitle,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      SizedBox(height: 24.h),
+                      ElevatedButton.icon(
+                        onPressed: _solve,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text("Try Again"),
                       ),
                     ],
                   ),
+                ),
+              )
+            // ── Result ────────────────────────────────────────────────
+            : SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Captured Image ──────────────────────────────
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 20.h),
+                      height: 180.h,
+                      width: double.infinity,
+                      child: imageFile == null
+                          ? Center(
+                              child: TextButton(
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  "/camera_screen",
+                                ),
+                                child: const Text("No Image — tap to pick one"),
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(20.r),
+                              child: Image.file(imageFile, fit: BoxFit.cover),
+                            ),
+                    ),
 
-                  SizedBox(height: 20.h),
-
-                  // ── Steps List ───────────────────────────────────
-                  if (_steps.isEmpty)
-                    Center(
-                      child: Text(
-                        "No steps returned.",
-                        style: TextStyle(color: c.subtitle, fontSize: 13.sp),
+                    // ── Interpreted Problem ─────────────────────────
+                    if (_interpretedProblem.isNotEmpty) ...[
+                      Text(
+                        "Interpreted Problem",
+                        style: TextStyle(color: c.primary, fontSize: 14.sp),
                       ),
-                    )
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _steps.length,
-                      itemBuilder: (context, index) {
-                        final step = _steps[index] as Map<String, dynamic>;
-                        return SolverScreenStepsContainer(
-                          stepNumber: index,
-                          title: step['title']?.toString() ?? "",
-                          description: step['description']?.toString() ?? "",
-                          formula: step['formula']?.toString() ?? "",
-                        );
-                      },
-                    ),
-
-                  // ── Final Answer ─────────────────────────────────
-                  Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 20.h,
-                    ),
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      vertical: 24.h,
-                      horizontal: 16.w,
-                    ),
-                    decoration: BoxDecoration(
-                      color: c.surface,
-                      borderRadius: BorderRadius.circular(20.r),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromARGB(60, 104, 171, 255),
-                          blurRadius: 1,
-                          spreadRadius: 1,
-                          offset: Offset(0, 1),
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 12.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 16.h,
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 25.r,
-                          width: 110.r,
-                          decoration: BoxDecoration(
-                            color: c.primary,
-                            borderRadius: BorderRadius.circular(20.r),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              c.primary.withValues(alpha: 0.1),
+                              c.surface,
+                            ],
+                            stops: const [0.0, 0.025],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Text(
+                          _interpretedProblem,
+                          style: TextStyle(color: c.title, fontSize: 16.sp),
+                        ),
+                      ),
+                    ],
+
+                    SizedBox(height: 10.h),
+
+                    // ── Steps Header ─────────────────────────────────
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Step-by-Step\nBreakdown",
+                          style: TextStyle(
+                            color: c.title,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Container(
                           alignment: Alignment.center,
+                          height: 42,
+                          width: 90,
+                          decoration: BoxDecoration(
+                            color: c.surfaceVariant,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           child: Text(
-                            "FINAL ANSWER",
+                            "AI Solver",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: c.surface,
-                              fontSize: 8.sp,
+                              color: c.subtitle,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        SizedBox(height: 10.h),
-                        // ✅ Fixed: Removed broken Expanded inside Column
-                        Text(
-                          _finalAnswer,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: c.primary,
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                       ],
                     ),
-                  ),
 
-                  // ── Action Buttons ───────────────────────────────
-                  SolverAIContainer(
-                    color: c.surface,
-                    text: "Explain More",
-                    icon: Icons.auto_awesome_outlined,
-                    textColor: c.primary,
-                    iconColor: c.primary,
-                    onTap: () {},
-                  ),
-                  SizedBox(height: 10.h),
-                  SolverAIContainer(
-                    color: c.primary,
-                    text: "Ask AI Chat",
-                    icon: Icons.smart_toy_outlined,
-                    textColor: c.surface,
-                    iconColor: c.surface,
-                    onTap: () =>
-                        Navigator.pushNamed(context, "/aichatbot_screen"),
-                  ),
-                  SizedBox(height: 10.h),
-                  SolverAIContainer(
-                    color: c.surface,
-                    text: "Similar Task",
-                    icon: Icons.history,
-                    textColor: c.primary,
-                    iconColor: c.primary,
-                    onTap: () {},
-                  ),
-                  SizedBox(height: 20.h),
-                ],
+                    SizedBox(height: 20.h),
+
+                    // ── Steps List ───────────────────────────────────
+                    if (_steps.isEmpty)
+                      Center(
+                        child: Text(
+                          "No steps returned.",
+                          style: TextStyle(color: c.subtitle, fontSize: 13.sp),
+                        ),
+                      )
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _steps.length,
+                        itemBuilder: (context, index) {
+                          final step = _steps[index] as Map<String, dynamic>;
+                          return SolverScreenStepsContainer(
+                            stepNumber: index,
+                            title: step['title']?.toString() ?? "",
+                            description: step['description']?.toString() ?? "",
+                            formula: step['formula']?.toString() ?? "",
+                          );
+                        },
+                      ),
+
+                    // ── Final Answer ─────────────────────────────────
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 20.h,
+                      ),
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 24.h,
+                        horizontal: 16.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.surface,
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color.fromARGB(60, 104, 171, 255),
+                            blurRadius: 1,
+                            spreadRadius: 1,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 25.r,
+                            width: 110.r,
+                            decoration: BoxDecoration(
+                              color: c.primary,
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "FINAL ANSWER",
+                              style: TextStyle(
+                                color: c.surface,
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          // ✅ Fixed: Removed broken Expanded inside Column
+                          Text(
+                            _finalAnswer,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: c.primary,
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ── Action Buttons ───────────────────────────────
+                    SolverAIContainer(
+                      color: c.surface,
+                      text: "Explain More",
+                      icon: Icons.auto_awesome_outlined,
+                      textColor: c.primary,
+                      iconColor: c.primary,
+                      onTap: () {},
+                    ),
+                    SizedBox(height: 10.h),
+                    SolverAIContainer(
+                      color: c.primary,
+                      text: "Ask AI Chat",
+                      icon: Icons.smart_toy_outlined,
+                      textColor: c.surface,
+                      iconColor: c.surface,
+                      onTap: () =>
+                          Navigator.pushNamed(context, "/aichatbot_screen"),
+                    ),
+                    SizedBox(height: 10.h),
+                    SolverAIContainer(
+                      color: c.surface,
+                      text: "Similar Task",
+                      icon: Icons.history,
+                      textColor: c.primary,
+                      iconColor: c.primary,
+                      onTap: () {},
+                    ),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

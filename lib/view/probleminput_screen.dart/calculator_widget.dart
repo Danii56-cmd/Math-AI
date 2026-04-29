@@ -47,13 +47,19 @@ class _MathCalculatorWidgetState extends State<MathCalculatorWidget>
 
   // ── button builders ──────────────────────────────────────────────────────
 
-  Widget _numBtn(String label) =>
-      _CalcButton(label: label, onTap: () => widget.onKeyTap(label));
+  Widget _numBtn(String label) => _CalcButton(
+    label: label,
+    onTap: () => widget.onKeyTap(label),
+    onLongPressStart: widget.onBackspaceLongPressStart,
+    onLongPressEnd: widget.onBackspaceLongPressEnd,
+  );
 
   Widget _opBtn(String label, {String? insert}) => _CalcButton(
     label: label,
     isOperator: true,
     onTap: () => widget.onKeyTap(insert ?? label),
+    onLongPressStart: widget.onBackspaceLongPressStart,
+    onLongPressEnd: widget.onBackspaceLongPressEnd,
   );
 
   Widget _fnBtn(String label, {String? insert, bool isSpecial = false}) =>
@@ -62,10 +68,17 @@ class _MathCalculatorWidgetState extends State<MathCalculatorWidget>
         isFunction: true,
         isSpecial: isSpecial,
         onTap: () => widget.onKeyTap(insert ?? '$label('),
+        onLongPressStart: widget.onBackspaceLongPressStart,
+        onLongPressEnd: widget.onBackspaceLongPressEnd,
       );
 
-  Widget _backBtn() =>
-      _CalcButton(label: '⌫', isBackspace: true, onTap: widget.onBackspace);
+  Widget _backBtn() => _CalcButton(
+    label: '⌫',
+    isBackspace: true,
+    onTap: widget.onBackspace,
+    onLongPressStart: widget.onBackspaceLongPressStart,
+    onLongPressEnd: widget.onBackspaceLongPressEnd,
+  );
 
   // ── tab content ───────────────────────────────────────────────────────────
 
@@ -329,10 +342,14 @@ class _CalcButton extends StatelessWidget {
   final bool isFunction;
   final bool isSpecial;
   final bool isBackspace;
+  final VoidCallback onLongPressStart;
+  final VoidCallback onLongPressEnd;
 
   const _CalcButton({
     required this.label,
     required this.onTap,
+    required this.onLongPressStart,
+    required this.onLongPressEnd,
     this.isOperator = false,
     this.isFunction = false,
     this.isSpecial = false,
@@ -362,13 +379,18 @@ class _CalcButton extends StatelessWidget {
     }
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+
       onTap: onTap,
+
+      onLongPressStart: (_) => onLongPressStart(),
+      onLongPressEnd: (_) => onLongPressEnd(),
+
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(30.r),
-          // border: Border.all(color: c.border.withOpacity(0.5)),
         ),
         child: Center(
           child: Text(

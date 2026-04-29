@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class CalculatorProvider extends ChangeNotifier {
@@ -26,8 +28,10 @@ class CalculatorProvider extends ChangeNotifier {
 
   void deleteLast() {
     if (controller.text.isNotEmpty) {
-      controller.text =
-          controller.text.substring(0, controller.text.length - 1);
+      controller.text = controller.text.substring(
+        0,
+        controller.text.length - 1,
+      );
       notifyListeners();
     }
   }
@@ -51,5 +55,42 @@ class CalculatorProvider extends ChangeNotifier {
     controller.dispose();
     focusNode.dispose();
     super.dispose();
+  }
+
+  // ── RESET ────────────────────────────────────────
+  void reset() {
+    controller.clear();
+    _showCalculator = false;
+    notifyListeners();
+  }
+
+  // ── LONG-PRESS DELETE  ─────────────────────────
+
+  Timer? _deleteTimer;
+
+  void startDeletingWords() {
+    // cancel any existing timer
+    _deleteTimer?.cancel();
+
+    int counter = 0;
+
+    _deleteTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (controller.text.isEmpty) {
+        stopDeleting();
+        return;
+      }
+
+      if (counter < 5) {
+        deleteLast(); // delete chars fast first
+      } else {
+        deleteWord(); // then delete words
+      }
+
+      counter++;
+    });
+  }
+
+  void stopDeleting() {
+    _deleteTimer?.cancel();
   }
 }

@@ -1,0 +1,75 @@
+# Math AI Project Overview
+
+This document provides a comprehensive overview of the technologies used, the project architecture, and the future steps planned for the Math AI application.
+
+## 1. Technologies & Packages Used (Current Stack)
+
+### Core Framework
+*   **Flutter & Dart:** The primary framework and language used for cross-platform mobile development.
+
+### State Management
+*   **Provider (`provider: ^6.1.5+1`):** Used to manage the application state globally. It allows different screens to read and write to state easily (e.g., `aichat_provider.dart`, `calculator_provider.dart`, `history_provider.dart`).
+
+### Backend & Cloud Services
+*   **Firebase Core (`firebase_core`):** Initialization and base integration for Firebase.
+*   **Firebase Auth (`firebase_auth`):** Used for user authentication and session management.
+*   **Cloud Firestore (`cloud_firestore`):** A NoSQL cloud database used to store user profiles, problem histories, and potentially course progress.
+*   **Gemini AI API:** Integrated via HTTP to send user problems (images/text) to Google's Gemini model and receive step-by-step mathematical solutions (`gemini_service.dart`).
+
+### Device Capabilities (Camera & Images)
+*   **Camera (`camera`):** Enables capturing live photos of math problems within the app.
+*   **Image Picker (`image_picker`):** Allows users to select existing photos from their device's gallery.
+*   **Image Cropper (`image_cropper`):** Provides a UI for users to crop the captured/selected image to focus strictly on the math problem before processing.
+
+### UI & UX Components
+*   **Flutter ScreenUtil (`flutter_screenutil`):** Adapts UI and font sizes to ensure a consistent look across different screen sizes and aspect ratios.
+*   **Flutter Spinkit (`flutter_spinkit`):** Provides appealing, animated loading indicators during asynchronous operations (like waiting for AI responses).
+*   **Cupertino Icons (`cupertino_icons`):** Provides iOS-styled icons for the application.
+
+### Tooling
+*   **Flutter Launcher Icons (`flutter_launcher_icons`):** Simplifies the process of generating app icons for both Android and iOS from a single source image.
+*   **HTTP (`http`):** Used for making network requests, particularly interacting with the Gemini API.
+
+---
+
+## 2. Project Architecture
+
+The codebase follows an organized directory structure under the `lib/` folder:
+
+*   **`view/`:** Contains all the UI screens.
+    *   `Aichatbotbotscreen/`: UI for chatting with the AI.
+    *   `courselibrary/`: UI for browsing available courses/topics.
+    *   `history/`: Shows past solved problems.
+    *   `home/`: Main dashboard screen.
+    *   `probleminput_screen.dart/`: Manual typing of problems.
+    *   `scanner/`: Camera integration and image scanning UI.
+    *   `solver/`: Screen displaying the step-by-step solution from the AI.
+    *   `profile/`: User account and settings.
+*   **`provider/`:** Contains state controllers separating business logic from UI (e.g., `aichat_provider`, `calculator_provider`).
+*   **`services/`:** Holds external communication logic (e.g., `gemini_service.dart`).
+*   **`core/` & `utills/`:** Shared themes, constants, helper functions, and configurations.
+*   **`shared_widgets/`:** Reusable UI components (buttons, text fields, app bars) to keep views clean.
+
+---
+
+## 3. Future Implementations & Next Steps
+
+Based on the current foundation, here are the steps and features that will be (or should be) implemented in the future:
+
+### Step 1: Polish AI and Scanning Accuracy
+*   **Better Prompt Engineering:** Refine the prompts sent to Gemini to enforce strict JSON schemas or LaTeX formatted responses for mathematically accurate rendering.
+*   **Math Formula Rendering:** Integrate a package like `flutter_math_fork` or `webview_flutter` with MathJax to beautifully render complex mathematical symbols (integrals, matrices) from the AI's response instead of plain text.
+
+### Step 2: Advanced User Features
+*   **History Cloud Syncing:** Ensure all scanned problems and their AI solutions are saved to Cloud Firestore, so users can access their history across multiple devices upon logging in.
+*   **Interactive Courses:** Build out the `courselibrary` module by loading structured lessons and quizzes from Firebase.
+*   **Offline Mode Capabilities:** Implement local caching (e.g., using `sqflite` or `hive`) so users can access previously solved problems without an internet connection.
+
+### Step 3: Application Refinement
+*   **Error Handling & Edge Cases:** Implement robust user feedback mechanisms (e.g., snackbars or custom dialogs) for when the AI fails, the network drops, or image cropping yields an invalid image.
+*   **Performance Optimization:** Ensure image compression before sending to the Gemini API to reduce bandwidth and speed up the response time.
+*   **Unit & Widget Testing:** Write comprehensive tests for providers and core logic inside the `test/` directory.
+
+### Step 4: Release Preparation
+*   **Code Cleanup:** Fix any remaining linter warnings (`flutter lints`) or deprecation notices.
+*   **App Store / Play Store Build:** Configure signing keys, app metadata, privacy policies, and execute `flutter build apk/appbundle` and `flutter build ipa` for deployment.

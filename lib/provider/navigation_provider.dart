@@ -43,6 +43,7 @@ class NavigationProvider extends ChangeNotifier {
     _selectedIndex = pageIndex;
     notifyListeners();
   }
+  
 
   // Add field:
   String? _rawOcrText;
