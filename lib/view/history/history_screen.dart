@@ -1,25 +1,36 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
+import 'package:math_ai/view/history/database_helper.dart';
 import 'package:provider/provider.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
+  String _formatTime(Timestamp? timestamp) {
+    if (timestamp == null) return "Now";
+    final date = timestamp.toDate();
+
+    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final ampm = date.hour >= 12 ? "PM" : "AM";
+
+    return "$hour:${date.minute.toString().padLeft(2, '0')} $ampm";
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-
     return CustomPopScope(
       child: Scaffold(
         backgroundColor: c.bg,
+        // APP BAR
         appBar: AppBar(
           backgroundColor: c.bg,
           elevation: 0.7,
-          shadowColor: c.subtitle.withValues(alpha: 0.1),
           leading: IconButton(
             icon: Icon(Icons.arrow_back_rounded, color: c.primary),
             onPressed: () {
@@ -38,63 +49,75 @@ class HistoryScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.share_rounded, color: c.primary),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert_rounded, color: c.primary),
-              onPressed: () {},
-            ),
-          ],
         ),
+        // BODY
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Consumer<HistoryProvider>(
-                builder: (context, provider, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 20.h),
-
-                      _buildSearchBar(context, c),
-                      SizedBox(height: 20.h),
-
-                      _buildFilterChips(context, c),
-                      SizedBox(height: 30.h),
-
-                      // 🔥 TODAY FROM PROVIDER
-                      _sectionHeader("TODAY", context, c),
-                      ...provider.todayItems.map((item) {
-                        return HistoryItemCard(
-                          time: item["time"],
-                          tag: item["tag"],
-                          problem: item["problem"],
-                          solution: item["solution"],
-                          isFinal: item["isFinal"],
-                        );
-                      }),
-
-                      // 🔥 YESTERDAY FROM PROVIDER
-                      _sectionHeader("YESTERDAY", context, c),
-                      ...provider.yesterdayItems.map((item) {
-                        return HistoryItemCard(
-                          time: item["time"],
-                          tag: item["tag"],
-                          problem: item["problem"],
-                          solution: item["solution"],
-                          isFinal: item["isFinal"],
-                        );
-                      }),
-
-                      SizedBox(height: 20.h),
-                    ],
-                  );
-                },
-              ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Column(
+              children: [
+                SizedBox(height: 20.h),
+                _buildSearchBar(context, c),
+                SizedBox(height: 20.h),
+                _buildFilterChips(context, c),
+                SizedBox(height: 20.h),
+                // FIRESTORE LIST
+                Expanded(
+                  child: Consumer<HistoryProvider>(
+                    builder: (context, provider, child) {
+                      return StreamBuilder<QuerySnapshot>(
+                        stream: DatabaseHelper.getHistory(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Center(
+                              child: Text("No history found"),
+                            );
+                          }
+                          final docs = snapshot.data!.docs;
+                          final provider = Provider.of<HistoryProvider>(
+                            context,
+                          );
+                          final query = provider.searchQuery.toLowerCase();
+                          final filtered = docs.where((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final category = (data["category"] ?? "")
+                                .toString();
+                            final text = (data["searchText"] ?? "").toString();
+                            final categoryMatch =
+                                provider.selectedFilter == "All History" ||
+                                category == provider.selectedFilter;
+                            final searchMatch =
+                                query.isEmpty || text.contains(query);
+                            return categoryMatch && searchMatch;
+                          }).toList();
+                          return ListView.builder(
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final item =
+                                  filtered[index].data()
+                                      as Map<String, dynamic>;
+                              return HistoryItemCard(
+                                time: _formatTime(item["createdAt"]),
+                                tag: item["category"] ?? "UNKNOWN",
+                                problem: item["question"] ?? "",
+                                solution: item["solution"] ?? "",
+                                isFinal: true,
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -102,7 +125,7 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  // ================= SEARCH BAR =================
+  // SEARCH BAR
   Widget _buildSearchBar(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -115,13 +138,17 @@ class HistoryScreen extends StatelessWidget {
             prefixIcon: Icon(Icons.search, color: c.subtitle),
             hintText: "Search past solutions...",
             hintStyle: TextStyle(color: c.subtitle),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(color: c.border),
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide: BorderSide(color: c.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: c.primary.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: c.border),
             ),
           ),
         );
@@ -129,7 +156,7 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  // ================= FILTER CHIPS =================
+  // FILTER CHIPS
   Widget _buildFilterChips(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -190,25 +217,9 @@ class HistoryScreen extends StatelessWidget {
       ),
     );
   }
-
-  // ================= SECTION HEADER =================
-  Widget _sectionHeader(String title, BuildContext context, AppColors c) {
-    return Padding(
-      padding: EdgeInsets.only(left: 10.w, bottom: 10.h, top: 10.h),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: c.subtitle,
-          fontSize: 12.sp,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
 }
 
-// ================= HISTORY ITEM CARD =================
+// HISTORY ITEM CARD
 class HistoryItemCard extends StatelessWidget {
   final String time, tag, problem, solution;
   final bool isFinal;
@@ -329,28 +340,30 @@ class HistoryItemCard extends StatelessWidget {
                     child: Icon(Icons.check, color: Colors.white, size: 16.sp),
                   ),
                 if (isFinal) SizedBox(width: 12.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isFinal ? "FINAL SOLUTION" : "RESULT",
-                      style: TextStyle(
-                        color: c.primary,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isFinal ? "FINAL SOLUTION" : "RESULT",
+                        style: TextStyle(
+                          color: c.primary,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      solution,
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: c.title,
+                      SizedBox(height: 3.h),
+                      Text(
+                        solution,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: c.title,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
