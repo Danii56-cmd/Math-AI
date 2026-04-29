@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:math_ai/view/history/database_helper.dart';
 
 class HistoryProvider extends ChangeNotifier {
   String _searchQuery = "";
@@ -17,57 +20,22 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<Map<String, dynamic>> _history = [
-    {
-      "time": "14:22 PM",
-      "tag": "ALGEBRA",
-      "problem": "3x² + 12x - 9 = 0",
-      "solution": "x = -2 ± √7",
-      "isFinal": true,
-      "date": "today",
-    },
-    {
-      "time": "09:15 AM",
-      "tag": "CALCULUS",
-      "problem": "∫ (sin x + cos x) dx",
-      "solution": "sin x - cos x + C",
-      "isFinal": true,
-      "date": "today",
-    },
-    {
-      "time": "16:45 PM",
-      "tag": "GEOMETRY",
-      "problem": "Area of Triangle ABC",
-      "solution": "42.5 cm²",
-      "isFinal": false,
-      "date": "yesterday",
-    },
-  ];
+  // ================= FIREBASE STREAM =================
+  Stream<QuerySnapshot> get historyStream => DatabaseHelper.getHistory();
 
-  List<Map<String, dynamic>> get history => _history;
+  // ================= SEARCH FILTERING ON STREAM =================
+  Stream<QuerySnapshot> get filteredHistoryStream {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || _searchQuery.isEmpty) {
+      return DatabaseHelper.getHistory();
+    }
 
-  // 🔥 FILTERED (SEARCH + CATEGORY)
-  List<Map<String, dynamic>> get filteredHistory {
-    return _history.where((item) {
-      final matchSearch = item["problem"].toString().toLowerCase().contains(
-        _searchQuery.toLowerCase(),
-      );
-
-      final matchFilter = _selectedFilter == "All History"
-          ? true
-          : item["date"] == _selectedFilter.toLowerCase();
-
-      return matchSearch && matchFilter;
-    }).toList();
+    return FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .collection("history")
+        .where("searchText", arrayContains: _searchQuery.toLowerCase())
+        .orderBy("createdAt", descending: true)
+        .snapshots();
   }
-
-  // 🔥 GROUPED LOGIC (BASED ON FILTER)
-  bool get showTodayOnly => _selectedFilter == "Today";
-  bool get showYesterdayOnly => _selectedFilter == "Yesterday";
-
-  List<Map<String, dynamic>> get todayItems =>
-      filteredHistory.where((e) => e["date"] == "today").toList();
-
-  List<Map<String, dynamic>> get yesterdayItems =>
-      filteredHistory.where((e) => e["date"] == "yesterday").toList();
 }
