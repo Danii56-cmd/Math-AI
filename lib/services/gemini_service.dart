@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 
 class GeminiService {
-  static const String _apiKey = "AIzaSyAyR_V-GEkwOAu1IRvsBkriGWeHWS2Ec6A";
+  static const String _apiKey = "AIzaSyAIqmJjEzRLnUhz0taaje0OK0sxHLrFXsY";
   static const String _url =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 

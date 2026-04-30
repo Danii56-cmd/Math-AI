@@ -12,11 +12,11 @@ class NavigationProvider extends ChangeNotifier {
 
   void changeIndex(int index) {
     if (index != 2) {
-      clearImage(); // 🔥 auto clear when leaving solver
+      _capturedImage = null; // ← set directly, don't call clearImage()
       _expression = null;
     }
     _selectedIndex = index;
-    notifyListeners();
+    notifyListeners(); // ← now fires only once
   }
 
   void setImageAndNavigate(File image, int index) {
@@ -43,7 +43,6 @@ class NavigationProvider extends ChangeNotifier {
     _selectedIndex = pageIndex;
     notifyListeners();
   }
-  
 
   // Add field:
   String? _rawOcrText;

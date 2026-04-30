@@ -79,13 +79,6 @@ class _SolverScreenState extends State<SolverScreen> {
         _finalAnswer = solution;
         _isLoading = false;
       });
-
-      setState(() {
-        _interpretedProblem = interpreted;
-        _steps = result['steps'] as List<dynamic>? ?? [];
-        _finalAnswer = solution;
-        _isLoading = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -261,135 +254,132 @@ class _SolverScreenState extends State<SolverScreen> {
                     ],
 
                     // ── Steps Header ─────────────────────────────────
-                    imageFile == null
-                        ? SizedBox(height: 100.h)
-                        : Column(
-                            children: [
-                              SizedBox(height: 10.h),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Step-by-Step\nBreakdown",
-                                    style: TextStyle(
-                                      color: c.title,
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.center,
-                                    height: 42,
-                                    width: 90,
-                                    decoration: BoxDecoration(
-                                      color: c.surfaceVariant,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      "AI Solver",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: c.subtitle,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                    Column(
+                      children: [
+                        SizedBox(height: 10.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Step-by-Step\nBreakdown",
+                              style: TextStyle(
+                                color: c.title,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
                               ),
-                              SizedBox(
-                                height: 20.h,
-                              ), // ── Steps List ───────────────────────────────────
-                              if (_steps.isEmpty)
-                                Center(
-                                  child: Text(
-                                    "No steps returned.",
-                                    style: TextStyle(
-                                      color: c.subtitle,
-                                      fontSize: 13.sp,
-                                    ),
-                                  ),
-                                )
-                              else
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: _steps.length,
-                                  itemBuilder: (context, index) {
-                                    final step =
-                                        _steps[index] as Map<String, dynamic>;
-                                    return SolverScreenStepsContainer(
-                                      stepNumber: index,
-                                      title: step['title']?.toString() ?? "",
-                                      description:
-                                          step['description']?.toString() ?? "",
-                                      formula:
-                                          step['formula']?.toString() ?? "",
-                                    );
-                                  },
+                            ),
+                            Container(
+                              alignment: Alignment.center,
+                              height: 42,
+                              width: 90,
+                              decoration: BoxDecoration(
+                                color: c.surfaceVariant,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "AI Solver",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: c.subtitle,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20.h,
+                        ), // ── Steps List ───────────────────────────────────
+                        if (_steps.isEmpty)
+                          Center(
+                            child: Text(
+                              "No steps returned, please give me a Math Problem or Image.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: c.subtitle,
+                                fontSize: 13.sp,
+                              ),
+                            ),
+                          )
+                        else
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _steps.length,
+                            itemBuilder: (context, index) {
+                              final step = _steps[index];
+                              if (step is! Map) return const SizedBox.shrink();
+                              final stepMap = Map<String, dynamic>.from(step);
+                              return SolverScreenStepsContainer(
+                                stepNumber: index,
+                                title: (stepMap['title'] as String?) ?? "",
+                                description:
+                                    (stepMap['description'] as String?) ?? "",
+                                formula: (stepMap['formula'] as String?) ?? "",
+                              );
+                            },
+                          ),
+                        SizedBox(height: 20.h),
 
-                              // ── Final Answer ─────────────────────────────────
+                        // ── Final Answer ─────────────────────────────────
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 20.h,
+                          ),
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            vertical: 24.h,
+                            horizontal: 16.w,
+                          ),
+                          decoration: BoxDecoration(
+                            color: c.surface,
+                            borderRadius: BorderRadius.circular(20.r),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color.fromARGB(60, 104, 171, 255),
+                                blurRadius: 1,
+                                spreadRadius: 1,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
                               Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: 10.w,
-                                  vertical: 20.h,
-                                ),
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 24.h,
-                                  horizontal: 16.w,
-                                ),
+                                height: 25.r,
+                                width: 110.r,
                                 decoration: BoxDecoration(
-                                  color: c.surface,
+                                  color: c.primary,
                                   borderRadius: BorderRadius.circular(20.r),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color.fromARGB(60, 104, 171, 255),
-                                      blurRadius: 1,
-                                      spreadRadius: 1,
-                                      offset: Offset(0, 1),
-                                    ),
-                                  ],
                                 ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      height: 25.r,
-                                      width: 110.r,
-                                      decoration: BoxDecoration(
-                                        color: c.primary,
-                                        borderRadius: BorderRadius.circular(
-                                          20.r,
-                                        ),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        "FINAL ANSWER",
-                                        style: TextStyle(
-                                          color: c.surface,
-                                          fontSize: 8.sp,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 10.h),
-                                    // ✅ Fixed: Removed broken Expanded inside Column
-                                    Text(
-                                      _finalAnswer,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: c.primary,
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "FINAL ANSWER",
+                                  style: TextStyle(
+                                    color: c.surface,
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10.h),
+                              // Removed broken Expanded inside Column
+                              Text(
+                                _finalAnswer,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: c.primary,
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                      ],
+                    ),
 
                     // ── Action Buttons ───────────────────────────────
                     SolverAIContainer(
@@ -398,7 +388,9 @@ class _SolverScreenState extends State<SolverScreen> {
                       icon: Icons.auto_awesome_outlined,
                       textColor: c.primary,
                       iconColor: c.primary,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(context, "/aichatbot_screen");
+                      },
                     ),
                     SizedBox(height: 10.h),
                     SolverAIContainer(
@@ -407,8 +399,9 @@ class _SolverScreenState extends State<SolverScreen> {
                       icon: Icons.smart_toy_outlined,
                       textColor: c.surface,
                       iconColor: c.surface,
-                      onTap: () =>
-                          Navigator.pushNamed(context, "/aichatbot_screen"),
+                      onTap: () {
+                        Navigator.pushNamed(context, "/aichatbot_screen");
+                      },
                     ),
                     SizedBox(height: 10.h),
                     SolverAIContainer(
@@ -417,7 +410,13 @@ class _SolverScreenState extends State<SolverScreen> {
                       icon: Icons.history,
                       textColor: c.primary,
                       iconColor: c.primary,
-                      onTap: () {},
+                      onTap: () {
+                        // ── FIX: pass fromBottomNav: false so back button pops back here ──
+                        Provider.of<NavigationProvider>(
+                          context,
+                          listen: false,
+                        ).changeIndex(1);
+                      },
                     ),
                     SizedBox(height: 20.h),
                   ],

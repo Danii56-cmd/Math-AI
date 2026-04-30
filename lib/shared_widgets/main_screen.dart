@@ -31,7 +31,10 @@ class MainScreen extends StatelessWidget {
       body: Consumer<NavigationProvider>(
         builder: (context, nav, child) {
           if (nav.selectedIndex == 2) {
-            return SolverScreen(expression: nav.expression ?? "");
+            return SolverScreen(
+              key: ValueKey('${nav.expression}_${nav.capturedImage?.path}'),
+              expression: nav.expression ?? "",
+            );
           }
           return _screens[nav.selectedIndex];
         },

@@ -38,32 +38,87 @@ class HomeScreen extends StatelessWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-
         final shouldExit = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
           builder: (context) {
             return AlertDialog(
-              title: const Text("Exit App"),
-              content: const Text("Do you really want to exit the app?"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: const Text("Cancel"),
+              backgroundColor: c.bg,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              title: Text(
+                "Exit App",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: c.title,
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Text("Exit"),
+              ),
+              content: Text(
+                "Do you really want to exit the app?",
+                style: TextStyle(fontSize: 16, color: c.subtitle),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: c.iconColor,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 05.h,
+                          ),
+                          child: Text(
+                            "Cancel",
+                            style: TextStyle(
+                              color: c.surface,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 15.w,
+                            vertical: 05.h,
+                          ),
+                          child: Text(
+                            "Exit",
+                            style: TextStyle(
+                              color: c.title,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );
           },
         );
-
         if (shouldExit == true) {
           // close app
           SystemNavigator.pop();
@@ -257,7 +312,7 @@ class HomeScreen extends StatelessWidget {
                         title: "Ask AI Tutor",
                         subtitle: "Guided help",
                         onTap: () {
-                          context.read<NavigationProvider>().changeIndex(2);
+                          Navigator.pushNamed(context, "/aichatbot_screen");
                         },
                       ),
                     ],
@@ -300,7 +355,6 @@ class HomeScreen extends StatelessWidget {
                     },
                   ),
                 ),
-
                 SizedBox(height: 20.h),
               ],
             ),
