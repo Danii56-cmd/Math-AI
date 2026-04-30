@@ -5,6 +5,7 @@ import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/core/theme.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/provider/profile_provider.dart';
+import 'package:math_ai/services/auth_services.dart';
 import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +17,30 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String? userName;
+  String? userEmail;
+  @override
+  void initState() {
+    super.initState();
+    checkLogin();
+  }
+
+  Future<void> loadUser() async {
+    userName = await AuthServices.getUserName();
+    userEmail = await AuthServices.getUserEmail();
+    setState(() {});
+  }
+
+  Future<void> checkLogin() async {
+    final loggedIn = await AuthServices.isLoggedIn();
+
+    if (!loggedIn) {
+      Navigator.pushReplacementNamed(context, "/login");
+    } else {
+      loadUser();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
@@ -66,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 40.h),
-      
+
                 // ── Profile Header ───────────────────────────────────────────
                 Row(
                   children: [
@@ -86,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Mohammad Danyal Khan",
+                          userName ?? "Guest User",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -94,16 +119,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         Text(
-                          "Flutter Developer",
+                          userEmail ?? "EMAIL ADDRESS",
                           style: TextStyle(fontSize: 14, color: c.subtitle),
                         ),
                       ],
                     ),
                   ],
                 ),
-      
+
                 SizedBox(height: 20.h),
-      
+
                 // ── APPEARANCE Label ─────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -117,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 5.h),
-      
+
                 // ── Appearance Card ──────────────────────────────────────────
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -127,7 +152,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: Border.all(color: c.border),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: c.isDark ? 0.3 : 0.08),
+                        color: Colors.black.withValues(
+                          alpha: c.isDark ? 0.3 : 0.08,
+                        ),
                         blurRadius: 2,
                         spreadRadius: 1,
                         offset: const Offset(0, 2),
@@ -183,7 +210,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
                           backgroundColor: c.iconBgMuted,
-                          child: Icon(Icons.palette_outlined, color: c.iconMuted),
+                          child: Icon(
+                            Icons.palette_outlined,
+                            color: c.iconMuted,
+                          ),
                         ),
                         title: Text(
                           "App Theme",
@@ -205,9 +235,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-      
+
                 SizedBox(height: 20.h),
-      
+
                 // ── PREFERENCES Label ────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -221,7 +251,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 5.h),
-      
+
                 // ── Preferences Card ─────────────────────────────────────────
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -231,7 +261,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: Border.all(color: c.border),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: c.isDark ? 0.3 : 0.08),
+                        color: Colors.black.withValues(
+                          alpha: c.isDark ? 0.3 : 0.08,
+                        ),
                         blurRadius: 2,
                         spreadRadius: 1,
                         offset: const Offset(0, 2),
@@ -305,13 +337,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-      
+
                 SizedBox(height: 5.h),
-      
+
                 // ── Logout ───────────────────────────────────────────────────
                 Center(
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () async {
+                      await AuthServices.logout();
+                      if (!mounted) return;
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        "/login",
+                        (route) => false,
+                      );
+                    },
                     child: Container(
                       height: 50.h,
                       width: 100.w,
@@ -327,7 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-      
+
                 // ── Delete Account ───────────────────────────────────────────
                 Center(
                   child: GestureDetector(
@@ -341,13 +381,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Icon(
                             Icons.delete_forever_outlined,
-                            color: const Color(0xFFA83836).withValues(alpha: 0.7),
+                            color: const Color(
+                              0xFFA83836,
+                            ).withValues(alpha: 0.7),
                           ),
                           SizedBox(width: 5.w),
                           Text(
                             "Delete Account",
                             style: TextStyle(
-                              color: const Color(0xFFA83836).withValues(alpha: 0.7),
+                              color: const Color(
+                                0xFFA83836,
+                              ).withValues(alpha: 0.7),
                             ),
                           ),
                         ],

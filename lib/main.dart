@@ -1,4 +1,3 @@
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,7 +9,10 @@ import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/homescreen_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/provider/profile_provider.dart';
+import 'package:math_ai/services/auth_services.dart';
 import 'package:math_ai/view/Aichatbotbotscreen/Aichatbot_screen.dart';
+import 'package:math_ai/view/auth/login_screen.dart';
+import 'package:math_ai/view/auth/signup_screen.dart';
 import 'package:math_ai/view/probleminput_screen.dart/calculator_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:math_ai/shared_widgets/main_screen.dart';
@@ -21,12 +23,13 @@ import 'package:math_ai/view/splashscreen/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  // await FirebaseAuth.instance.signInAnonymously();
-  runApp(const MyApp());
+  final loggedIn = await AuthServices.isLoggedIn();
+  runApp(MyApp(isLoggedIn: loggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +55,11 @@ class MyApp extends StatelessWidget {
             themeMode: Provider.of<ThemeChangerProvider>(context).themeMode,
             debugShowCheckedModeBanner: false,
             initialRoute: "/",
+
             routes: {
               "/": (context) => const SplashScreen(),
+              "/login": (context) => const LoginScreen(),
+              "/signup": (context) => const SignupScreen(),
               "/home": (context) => const HomeScreen(),
               "/main_screen": (context) => const MainScreen(),
               "/camera_screen": (context) => const CameraScreen(),
