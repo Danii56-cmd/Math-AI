@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
+import 'package:math_ai/core/app_constants.dart';
 import 'package:math_ai/services/auth_services.dart';
 
 class SignupScreen extends StatelessWidget {
@@ -20,7 +21,9 @@ class SignupScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 100.h),
+            SizedBox(height: 50.h),
+            Image.asset(AppConstants.appLogo, height: 150.h, width: 150.w),
+            SizedBox(height: 10.h),
             Text(
               "Create Account",
               style: TextStyle(
@@ -29,7 +32,7 @@ class SignupScreen extends StatelessWidget {
                 color: c.title,
               ),
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 20.h),
             TextFormField(
               controller: nameController,
               decoration: InputDecoration(
@@ -116,6 +119,7 @@ class SignupScreen extends StatelessWidget {
               },
               child: const Text("Sign Up"),
             ),
+            SizedBox(height: 10.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -4,42 +4,68 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:math_ai/view/history/database_helper.dart';
 import 'package:provider/provider.dart';
 
-class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({super.key});
+class HistoryScreen extends StatefulWidget {
+  final bool fromBottomNav;
+
+  const HistoryScreen({super.key, this.fromBottomNav = false});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  // capture the stream ONCE so provider rebuilds don't recreate it ──
+  late final Stream<QuerySnapshot> _historyStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _historyStream = DatabaseHelper.getHistory();
+  }
 
   String _formatTime(Timestamp? timestamp) {
     if (timestamp == null) return "Now";
     final date = timestamp.toDate();
-
-    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final hour = date.hour > 12
+        ? date.hour - 12
+        : date.hour == 0
+        ? 12
+        : date.hour;
     final ampm = date.hour >= 12 ? "PM" : "AM";
-
     return "$hour:${date.minute.toString().padLeft(2, '0')} $ampm";
+  }
+
+  //  single back-navigation method used by AppBar + CustomPopScope ──
+  void _handleBack(BuildContext context) {
+    // if (widget.fromBottomNav) {
+    // Screen lives in IndexedStack — just switch tab, NEVER pop
+    Provider.of<NavigationProvider>(context, listen: false).changeIndex(0);
+    // } else {
+    //   // Pushed as a real route from Solver → pop it
+    //   // Navigator.pop(context);
+    //   debugPrint("Back button pressed");
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return CustomPopScope(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        _handleBack(context);
+      },
       child: Scaffold(
         backgroundColor: c.bg,
-        // APP BAR
         appBar: AppBar(
           backgroundColor: c.bg,
           elevation: 0.7,
           leading: IconButton(
             icon: Icon(Icons.arrow_back_rounded, color: c.primary),
-            onPressed: () {
-              final navProvider = Provider.of<NavigationProvider>(
-                context,
-                listen: false,
-              );
-              navProvider.changeIndex(0);
-            },
+            onPressed: () => _handleBack(context),
           ),
           title: Text(
             "Math Ai",
@@ -50,7 +76,6 @@ class HistoryScreen extends StatelessWidget {
             ),
           ),
         ),
-        // BODY
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -61,13 +86,19 @@ class HistoryScreen extends StatelessWidget {
                 SizedBox(height: 20.h),
                 _buildFilterChips(context, c),
                 SizedBox(height: 20.h),
-                // FIRESTORE LIST
                 Expanded(
                   child: Consumer<HistoryProvider>(
                     builder: (context, provider, child) {
+                      // ── FIX 1 (cont): reuse _historyStream, don't call getHistory() here ──
                       return StreamBuilder<QuerySnapshot>(
-                        stream: DatabaseHelper.getHistory(),
+                        stream: _historyStream,
                         builder: (context, snapshot) {
+                          // ADD THIS — missing index or permission shows here
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text("Error: ${snapshot.error}"),
+                            );
+                          }
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const Center(
@@ -81,9 +112,6 @@ class HistoryScreen extends StatelessWidget {
                             );
                           }
                           final docs = snapshot.data!.docs;
-                          final provider = Provider.of<HistoryProvider>(
-                            context,
-                          );
                           final query = provider.searchQuery.toLowerCase();
                           final filtered = docs.where((doc) {
                             final data = doc.data() as Map<String, dynamic>;
@@ -97,6 +125,13 @@ class HistoryScreen extends StatelessWidget {
                                 query.isEmpty || text.contains(query);
                             return categoryMatch && searchMatch;
                           }).toList();
+
+                          if (filtered.isEmpty) {
+                            return const Center(
+                              child: Text("No matching history"),
+                            );
+                          }
+
                           return ListView.builder(
                             itemCount: filtered.length,
                             itemBuilder: (context, index) {
@@ -109,6 +144,7 @@ class HistoryScreen extends StatelessWidget {
                                 problem: item["question"] ?? "",
                                 solution: item["solution"] ?? "",
                                 isFinal: true,
+                                itemId: filtered[index].id,
                               );
                             },
                           );
@@ -125,7 +161,6 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  // SEARCH BAR
   Widget _buildSearchBar(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -156,7 +191,6 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  // FILTER CHIPS
   Widget _buildFilterChips(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -222,6 +256,7 @@ class HistoryScreen extends StatelessWidget {
 // HISTORY ITEM CARD
 class HistoryItemCard extends StatelessWidget {
   final String time, tag, problem, solution;
+  final String itemId;
   final bool isFinal;
 
   const HistoryItemCard({
@@ -231,6 +266,7 @@ class HistoryItemCard extends StatelessWidget {
     required this.problem,
     required this.solution,
     required this.isFinal,
+    required this.itemId,
   });
 
   @override
@@ -295,7 +331,38 @@ class HistoryItemCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 4.w),
-                  Icon(Icons.more_vert, color: c.subtitle, size: 18.sp),
+                  IconButton(
+                    icon: Icon(Icons.more_vert, color: c.subtitle, size: 18.sp),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text(
+                            "More options",
+                            style: TextStyle(color: c.primary),
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                title: const Text("Delete"),
+                                onTap: () async {
+                                  Navigator.pop(ctx); // close dialog first
+                                  await DatabaseHelper.deleteHistory(
+                                    itemId,
+                                  ); // then delete
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ],

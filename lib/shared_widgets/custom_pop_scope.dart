@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 class CustomPopScope extends StatelessWidget {
   final Widget child;
+  // final int index;
   const CustomPopScope({Key? key, required this.child}) : super(key: key);
 
   @override

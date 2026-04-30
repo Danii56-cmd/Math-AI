@@ -13,6 +13,7 @@ import 'package:math_ai/services/auth_services.dart';
 import 'package:math_ai/view/Aichatbotbotscreen/Aichatbot_screen.dart';
 import 'package:math_ai/view/auth/login_screen.dart';
 import 'package:math_ai/view/auth/signup_screen.dart';
+import 'package:math_ai/view/history/history_screen.dart';
 import 'package:math_ai/view/probleminput_screen.dart/calculator_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:math_ai/shared_widgets/main_screen.dart';
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
               "/camera_screen": (context) => const CameraScreen(),
               "/aichatbot_screen": (context) => const AichatbotScreen(),
               "/calculator_screen": (context) => const CalculatorScreen(),
+              "/history_screen": (context) => const HistoryScreen(),
             },
           );
         },
