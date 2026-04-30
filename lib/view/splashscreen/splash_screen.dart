@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_constants.dart';
+import 'package:math_ai/services/auth_services.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,10 +16,32 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, "/main_screen");
-    });
+    start();
   }
+
+  void start() async {
+    await Future.delayed(const Duration(seconds: 3));
+
+    bool isLoggedIn = await AuthServices.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      Navigator.pushReplacementNamed(context, "/main_screen");
+    } else {
+      Navigator.pushReplacementNamed(context, "/login");
+    }
+  }
+
+  // void checkLogin(BuildContext context) async {
+  //   bool isLoggedIn = await AuthServices.isLoggedIn();
+
+  //   if (isLoggedIn) {
+  //     Navigator.pushReplacementNamed(context, "/main_screen");
+  //   } else {
+  //     Navigator.pushReplacementNamed(context, "/login");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
