@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
+import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StartupScreen extends StatelessWidget {
@@ -103,7 +105,10 @@ class StartupScreen extends StatelessWidget {
                 await prefs.setString("userName", name);
                 await prefs.setString("userProfession", profession);
                 await prefs.setBool("isLoggedIn", true);
-
+                Provider.of<NavigationProvider>(
+                  context,
+                  listen: false,
+                ).changeIndex(0);
                 Navigator.pushReplacementNamed(context, "/main_screen");
               },
               child: const Text("Continue"),

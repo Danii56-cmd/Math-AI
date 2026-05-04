@@ -138,7 +138,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: c.title,
       body: Stack(
         children: [
           SizedBox.expand(child: CameraPreview(controller!)),
@@ -157,7 +157,7 @@ class _CameraScreenState extends State<CameraScreen> {
                     Text(
                       _statusText,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: c.surface,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w500,
                       ),
@@ -179,7 +179,6 @@ class _CameraScreenState extends State<CameraScreen> {
                       _buildRoundButton(
                         Icons.close,
                         () => Navigator.pop(context),
-                        c,
                       ),
                       _buildScannerTag(c),
                       _buildRoundButton(
@@ -190,7 +189,6 @@ class _CameraScreenState extends State<CameraScreen> {
                             isFlashOn ? FlashMode.torch : FlashMode.off,
                           );
                         },
-                        c,
                       ),
                     ],
                   ),
@@ -202,7 +200,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   SizedBox(height: 20.h),
                   Text(
                     _statusText,
-                    style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                    style: TextStyle(color: c.surface, fontSize: 14.sp),
                   ),
 
                   const Spacer(),
@@ -213,8 +211,8 @@ class _CameraScreenState extends State<CameraScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildGalleryButton(c),
-                        _buildShutterButton(c),
+                        _buildGalleryButton(),
+                        _buildShutterButton(),
                         SizedBox(width: 60.w),
                       ],
                     ),
@@ -228,7 +226,9 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildRoundButton(IconData icon, VoidCallback onTap, AppColors c) {
+  Widget _buildRoundButton(IconData icon, VoidCallback onTap) {
+    final c = AppColors.of(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -240,7 +240,7 @@ class _CameraScreenState extends State<CameraScreen> {
         ),
         child: Icon(
           icon,
-          color: icon == Icons.bolt ? Colors.amber : Colors.white,
+          color: icon == Icons.bolt ? Colors.amber : c.surface,
           size: 24.sp,
         ),
       ),
@@ -325,7 +325,9 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Widget _buildGalleryButton(AppColors c) {
+  Widget _buildGalleryButton() {
+    final c = AppColors.of(context);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -346,19 +348,18 @@ class _CameraScreenState extends State<CameraScreen> {
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: c.border.withAlpha(120)),
             ),
-            child: const Icon(Icons.photo_library, color: Colors.white),
+            child: Icon(Icons.photo_library, color: c.surface),
           ),
         ),
         SizedBox(height: 5.h),
-        const Text(
-          "GALLERY",
-          style: TextStyle(color: Colors.white, fontSize: 10),
-        ),
+        Text("GALLERY", style: TextStyle(color: c.surface, fontSize: 10)),
       ],
     );
   }
 
-  Widget _buildShutterButton(AppColors c) {
+  Widget _buildShutterButton() {
+    final c = AppColors.of(context);
+
     return GestureDetector(
       onTap: isCapturing
           ? null
@@ -370,18 +371,18 @@ class _CameraScreenState extends State<CameraScreen> {
               await _processImage(File(file.path), c);
             },
       child: isCapturing
-          ? const SpinKitCircle(color: Colors.white, size: 50)
+          ? SpinKitCircle(color: c.surface, size: 50.r)
           : Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
+                border: Border.all(color: c.surface, width: 4.w),
               ),
               child: Container(
                 height: 60.r,
                 width: 60.r,
                 margin: EdgeInsets.all(4.r),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: c.surface,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.document_scanner, color: c.primary),
