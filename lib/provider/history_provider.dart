@@ -36,6 +36,11 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners(); // ← rebuilds UI after deleting
   }
 
+  void removeHistoryAt(int index) {
+    DatabaseHelper.deleteHistory(index);
+    notifyListeners();
+  }
+
   // ================= CLEAR ALL HISTORY =================
   Future<void> clearHistory() async {
     await DatabaseHelper.clearHistory();

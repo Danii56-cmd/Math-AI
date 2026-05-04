@@ -16,4 +16,5 @@ class AppConstants {
   static String userProfile = "assets/images/user-profile.png";
   static String problemPic = "assets/images/problem.png";
   static String aiBot = "assets/images/Ai-mentor.png";
+  static String youtubeIcon = "assets/images/youtube-logo.png";
 }

@@ -266,14 +266,15 @@ class _SolverScreenState extends State<SolverScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "Step-by-Step\nBreakdown",
-                              style: TextStyle(
-                                color: c.title,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
+                            if (_steps.isNotEmpty)
+                              Text(
+                                "Step-by-Step\nBreakdown",
+                                style: TextStyle(
+                                  color: c.title,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
                             Container(
                               alignment: Alignment.center,
                               height: 42,
@@ -327,63 +328,64 @@ class _SolverScreenState extends State<SolverScreen> {
                             },
                           ),
                         SizedBox(height: 20.h),
-
                         // ── Final Answer ─────────────────────────────────
-                        Container(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 20.h,
-                          ),
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(
-                            vertical: 24.h,
-                            horizontal: 16.w,
-                          ),
-                          decoration: BoxDecoration(
-                            color: c.surface,
-                            borderRadius: BorderRadius.circular(20.r),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color.fromARGB(60, 104, 171, 255),
-                                blurRadius: 1,
-                                spreadRadius: 1,
-                                offset: Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 25.r,
-                                width: 110.r,
-                                decoration: BoxDecoration(
-                                  color: c.primary,
-                                  borderRadius: BorderRadius.circular(20.r),
+                        if (_steps.isNotEmpty)
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 20.h,
+                            ),
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(
+                              vertical: 24.h,
+                              horizontal: 16.w,
+                            ),
+                            decoration: BoxDecoration(
+                              color: c.surface,
+                              borderRadius: BorderRadius.circular(20.r),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromARGB(60, 104, 171, 255),
+                                  blurRadius: 1,
+                                  spreadRadius: 1,
+                                  offset: Offset(0, 1),
                                 ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "FINAL ANSWER",
-                                  style: TextStyle(
-                                    color: c.surface,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.bold,
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 25.r,
+                                  width: 110.r,
+                                  decoration: BoxDecoration(
+                                    color: c.primary,
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "FINAL ANSWER",
+                                    style: TextStyle(
+                                      color: c.surface,
+                                      fontSize: 8.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 10.h),
-                              // Removed broken Expanded inside Column
-                              Text(
-                                _finalAnswer,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: c.primary,
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.w500,
+                                SizedBox(height: 10.h),
+                                Text(
+                                  _finalAnswer,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: c.primary,
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
+                              ],
+                            ),
+                          )
+                        else
+                          const SizedBox.shrink(),
                       ],
                     ),
 
