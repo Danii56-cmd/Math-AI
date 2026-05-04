@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
-import 'package:math_ai/services/auth_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class StartupScreen extends StatelessWidget {
+  const StartupScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     TextEditingController userNameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
     final c = AppColors.of(context);
 
     return Scaffold(
@@ -25,19 +24,24 @@ class LoginScreen extends StatelessWidget {
             Image.asset(AppConstants.appLogo, height: 150.h, width: 150.w),
             SizedBox(height: 10.h),
             Text(
-              "Login",
+              "Welcome!",
               style: TextStyle(
                 fontSize: 32.sp,
                 fontWeight: FontWeight.bold,
                 color: c.title,
               ),
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 20),
+            Text(
+              "Please enter your details to continue",
+              style: TextStyle(fontSize: 16.sp, color: c.subtitle),
+            ),
+            SizedBox(height: 50.h),
             // Username
             TextFormField(
               controller: userNameController,
               decoration: InputDecoration(
-                labelText: "Name",
+                labelText: "Enter Your Name",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.r),
                 ),
@@ -56,27 +60,7 @@ class LoginScreen extends StatelessWidget {
             TextFormField(
               controller: emailController,
               decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.r),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.r),
-                  borderSide: BorderSide(color: c.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.r),
-                  borderSide: BorderSide(color: c.primary),
-                ),
-              ),
-            ),
-            SizedBox(height: 20.h),
-            // Password
-            TextFormField(
-              obscureText: true,
-              controller: passwordController,
-              decoration: InputDecoration(
-                labelText: "Password",
+                labelText: "Please enter your Profession",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.r),
                 ),
@@ -104,37 +88,27 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () async {
-                final auth = AuthServices();
-                final result = await auth.login(
-                  email: emailController.text.trim(),
-                  password: passwordController.text.trim(),
-                );
-                if (result == "success") {
-                  Navigator.pushReplacementNamed(context, "/main_screen");
-                } else {
+                final name = userNameController.text.trim();
+                final profession = emailController.text.trim();
+
+                if (name.isEmpty || profession.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(auth.getAuthErrorMessage(result!))),
+                    const SnackBar(content: Text("Please fill all fields")),
                   );
+                  return;
                 }
+
+                final prefs = await SharedPreferences.getInstance();
+
+                await prefs.setString("userName", name);
+                await prefs.setString("userProfession", profession);
+                await prefs.setBool("isLoggedIn", true);
+
+                Navigator.pushReplacementNamed(context, "/main_screen");
               },
-              child: const Text("Login"),
+              child: const Text("Continue"),
             ),
             SizedBox(height: 10.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Don't have an account? ",
-                  style: TextStyle(color: c.title),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/signup");
-                  },
-                  child: Text("Sign Up", style: TextStyle(color: c.primary)),
-                ),
-              ],
-            ),
           ],
         ),
       ),

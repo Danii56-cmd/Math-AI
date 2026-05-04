@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:math_ai/controllers/math_controller.dart';
 import 'package:math_ai/core/app_colors.dart';
+import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:math_ai/view/history/database_helper.dart';
@@ -67,10 +68,15 @@ class _SolverScreenState extends State<SolverScreen> {
 
       // 🔥 SAVE TO FIRESTORE HERE
       await DatabaseHelper.saveHistory(
-        question: interpreted,
-        solution: solution,
-        category: _detectCategory(interpreted),
-        type: imageFile != null ? "image" : "text",
+        HistoryModel(
+          question: interpreted,
+          solution: solution,
+          category: _detectCategory(interpreted),
+          type: imageFile != null ? "image" : "text",
+          steps: result['steps'] ?? [],
+          searchText: interpreted.toLowerCase(),
+          createdAt: DateTime.now(),
+        ),
       );
 
       setState(() {

@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/view/history/database_helper.dart';
 
 class HistoryProvider extends ChangeNotifier {
+  // ================= SEARCH =================
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
 
@@ -12,6 +12,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ================= FILTER =================
   String _selectedFilter = "All History";
   String get selectedFilter => _selectedFilter;
 
@@ -20,22 +21,39 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= FIREBASE STREAM =================
-  Stream<QuerySnapshot> get historyStream => DatabaseHelper.getHistory();
+  // ================= GET ALL HISTORY =================
+  List<HistoryModel> get historyList => DatabaseHelper.getHistory();
 
-  // ================= SEARCH FILTERING ON STREAM =================
-  Stream<QuerySnapshot> get filteredHistoryStream {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || _searchQuery.isEmpty) {
-      return DatabaseHelper.getHistory();
-    }
+  // ================= ADD HISTORY =================
+  Future<void> addHistory(HistoryModel model) async {
+    await DatabaseHelper.saveHistory(model);
+    notifyListeners(); // ← rebuilds UI after adding
+  }
 
-    return FirebaseFirestore.instance
-        .collection("users")
-        .doc(user.uid)
-        .collection("history")
-        .where("searchText", arrayContains: _searchQuery.toLowerCase())
-        .orderBy("createdAt", descending: true)
-        .snapshots();
+  // ================= DELETE HISTORY =================
+  Future<void> deleteHistory(int index) async {
+    await DatabaseHelper.deleteHistory(index);
+    notifyListeners(); // ← rebuilds UI after deleting
+  }
+
+  // ================= CLEAR ALL HISTORY =================
+  Future<void> clearHistory() async {
+    await DatabaseHelper.clearHistory();
+    notifyListeners();
+  }
+
+  // ================= FILTERED HISTORY =================
+  List<HistoryModel> get filteredHistory {
+    final query = _searchQuery.toLowerCase();
+
+    return historyList.where((item) {
+      final categoryMatch =
+          _selectedFilter == "All History" || item.category == _selectedFilter;
+
+      final searchMatch =
+          query.isEmpty || item.searchText.toLowerCase().contains(query);
+
+      return categoryMatch && searchMatch;
+    }).toList();
   }
 }
