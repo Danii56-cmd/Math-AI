@@ -289,6 +289,13 @@ class HistoryItemCard extends StatelessWidget {
                                 await DatabaseHelper.deleteHistory(
                                   int.parse(itemId),
                                 );
+
+                                if (context.mounted) {
+                                  Provider.of<HistoryProvider>(
+                                    context,
+                                    listen: false,
+                                  ).removeHistoryAt(int.parse(itemId));
+                                }
                               },
                               child: const Text("Delete"),
                             ),
@@ -308,7 +315,7 @@ class HistoryItemCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
-              color: Colors.black87,
+              color: c.title,
             ),
           ),
           SizedBox(height: 15.h),
@@ -322,27 +329,29 @@ class HistoryItemCard extends StatelessWidget {
               children: [
                 Icon(Icons.check_circle, color: c.primary, size: 28.sp),
                 SizedBox(width: 12.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "FINAL SOLUTION",
-                      style: TextStyle(
-                        color: c.primary,
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "FINAL SOLUTION",
+                        style: TextStyle(
+                          color: c.primary,
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                    Text(
-                      solution,
-                      style: TextStyle(
-                        color: c.title,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.sp,
+                      Text(
+                        solution,
+                        style: TextStyle(
+                          color: c.title,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
