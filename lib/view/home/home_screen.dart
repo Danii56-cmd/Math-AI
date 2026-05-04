@@ -216,7 +216,7 @@ class HomeScreen extends StatelessWidget {
                     ).changeIndex(1);
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(left: 310),
+                    margin: EdgeInsets.only(left: 250.w),
                     alignment: Alignment.center,
                     height: 35,
                     width: 75,
@@ -255,14 +255,15 @@ class HomeScreen extends StatelessWidget {
 
                 // ── Grid ─────────────────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
                       CustomGridViewContainer(
-                        icon: AppConstants.cameraIcon,
+                        icon: Icons.camera,
+                        iconColor: c.primary,
                         title: "Scan Problem",
                         subtitle: "Use your camera",
                         onTap: () async {
@@ -278,7 +279,9 @@ class HomeScreen extends StatelessWidget {
                         },
                       ),
                       CustomGridViewContainer(
-                        icon: AppConstants.galleryIcon,
+                        icon: Icons.image_outlined,
+                        iconColor: Color.fromARGB(255, 145, 121, 187),
+                        iconbgColor: Color.fromARGB(255, 246, 236, 255),
                         title: "Upload Image",
                         subtitle: "Pick from gallery",
                         onTap: () async {
@@ -299,7 +302,8 @@ class HomeScreen extends StatelessWidget {
                         },
                       ),
                       CustomGridViewContainer(
-                        icon: AppConstants.keyboardIcon,
+                        icon: Icons.keyboard_alt_outlined,
+                        iconColor: c.subtitle,
                         title: "Type Problem",
                         subtitle: "Enter expression",
                         onTap: () {
@@ -308,7 +312,8 @@ class HomeScreen extends StatelessWidget {
                         },
                       ),
                       CustomGridViewContainer(
-                        icon: AppConstants.aiIcon,
+                        icon: Icons.smart_toy_outlined,
+                        iconColor: c.primary,
                         title: "Ask AI Tutor",
                         subtitle: "Guided help",
                         onTap: () {

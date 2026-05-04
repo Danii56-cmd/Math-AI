@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 
 class CustomGridViewContainer extends StatelessWidget {
-  final String icon;
+  final IconData icon;
+  final Color? iconColor;
+  final Color? iconbgColor;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -11,6 +13,8 @@ class CustomGridViewContainer extends StatelessWidget {
   const CustomGridViewContainer({
     super.key,
     required this.icon,
+    this.iconColor,
+    this.iconbgColor,
     required this.title,
     required this.subtitle,
     required this.onTap,
@@ -37,7 +41,11 @@ class CustomGridViewContainer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(icon, height: 50, width: 50),
+                CircleAvatar(
+                  backgroundColor:
+                      iconbgColor ?? const Color.fromARGB(255, 232, 240, 255),
+                  child: Icon(icon, size: 30, color: iconColor ?? c.primary),
+                ),
 
                 SizedBox(height: 3),
 

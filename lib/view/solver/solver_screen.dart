@@ -226,7 +226,6 @@ class _SolverScreenState extends State<SolverScreen> {
                               child: Image.file(imageFile, fit: BoxFit.cover),
                             ),
                     ),
-
                     // ── Interpreted Problem ─────────────────────────
                     if (_interpretedProblem.isNotEmpty) ...[
                       Text(
@@ -258,7 +257,6 @@ class _SolverScreenState extends State<SolverScreen> {
                         ),
                       ),
                     ],
-
                     // ── Steps Header ─────────────────────────────────
                     Column(
                       children: [
@@ -388,7 +386,27 @@ class _SolverScreenState extends State<SolverScreen> {
                           const SizedBox.shrink(),
                       ],
                     ),
-
+                    if (_steps.isNotEmpty)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Color.fromARGB(94, 167, 187, 221),
+                            child: IconButton(
+                              icon: Icon(Icons.camera, color: c.iconColor),
+                              onPressed: () {
+                                Navigator.pushNamed(context, "/camera_screen");
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          Text(
+                            "Capture another problem",
+                            style: TextStyle(color: c.title, fontSize: 13.sp),
+                          ),
+                        ],
+                      ),
+                    SizedBox(height: 20.h),
                     // ── Action Buttons ───────────────────────────────
                     SolverAIContainer(
                       color: c.surface,
