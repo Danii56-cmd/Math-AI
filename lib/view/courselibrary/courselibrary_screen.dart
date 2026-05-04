@@ -80,7 +80,6 @@ class CourseLibraryScreen extends StatelessWidget {
                 Consumer<CourseProvider>(
                   builder: (context, courseProvider, child) {
                     return TextField(
-                      maxLines: 2,
                       decoration: InputDecoration(
                         fillColor: c.surface,
                         filled: true,

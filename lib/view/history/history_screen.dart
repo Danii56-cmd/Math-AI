@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
+import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/view/history/database_helper.dart';
@@ -17,42 +17,28 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  // capture the stream ONCE so provider rebuilds don't recreate it ──
-  late final Stream<QuerySnapshot> _historyStream;
-
-  @override
-  void initState() {
-    super.initState();
-    _historyStream = DatabaseHelper.getHistory();
+  void _handleBack(BuildContext context) {
+    Provider.of<NavigationProvider>(context, listen: false).changeIndex(0);
   }
 
-  String _formatTime(Timestamp? timestamp) {
-    if (timestamp == null) return "Now";
-    final date = timestamp.toDate();
+  String _formatTime(DateTime? date) {
+    if (date == null) return "Now";
+
     final hour = date.hour > 12
         ? date.hour - 12
         : date.hour == 0
         ? 12
         : date.hour;
-    final ampm = date.hour >= 12 ? "PM" : "AM";
-    return "$hour:${date.minute.toString().padLeft(2, '0')} $ampm";
-  }
 
-  //  single back-navigation method used by AppBar + CustomPopScope ──
-  void _handleBack(BuildContext context) {
-    // if (widget.fromBottomNav) {
-    // Screen lives in IndexedStack — just switch tab, NEVER pop
-    Provider.of<NavigationProvider>(context, listen: false).changeIndex(0);
-    // } else {
-    //   // Pushed as a real route from Solver → pop it
-    //   // Navigator.pop(context);
-    //   debugPrint("Back button pressed");
-    // }
+    final ampm = date.hour >= 12 ? "PM" : "AM";
+
+    return "$hour:${date.minute.toString().padLeft(2, '0')} $ampm";
   }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -76,77 +62,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
         ),
+
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               children: [
                 SizedBox(height: 20.h),
+
                 _buildSearchBar(context, c),
                 SizedBox(height: 20.h),
+
                 _buildFilterChips(context, c),
                 SizedBox(height: 20.h),
+
                 Expanded(
                   child: Consumer<HistoryProvider>(
                     builder: (context, provider, child) {
-                      // ── FIX 1 (cont): reuse _historyStream, don't call getHistory() here ──
-                      return StreamBuilder<QuerySnapshot>(
-                        stream: _historyStream,
-                        builder: (context, snapshot) {
-                          // ADD THIS — missing index or permission shows here
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Text("Error: ${snapshot.error}"),
-                            );
-                          }
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                              child: Text("No history found"),
-                            );
-                          }
-                          final docs = snapshot.data!.docs;
-                          final query = provider.searchQuery.toLowerCase();
-                          final filtered = docs.where((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final category = (data["category"] ?? "")
-                                .toString();
-                            final text = (data["searchText"] ?? "").toString();
-                            final categoryMatch =
-                                provider.selectedFilter == "All History" ||
-                                category == provider.selectedFilter;
-                            final searchMatch =
-                                query.isEmpty || text.contains(query);
-                            return categoryMatch && searchMatch;
-                          }).toList();
+                      final List<HistoryModel> filtered =
+                          provider.filteredHistory;
 
-                          if (filtered.isEmpty) {
-                            return const Center(
-                              child: Text("No matching history"),
-                            );
-                          }
+                      if (filtered.isEmpty) {
+                        return const Center(child: Text("No history found"));
+                      }
 
-                          return ListView.builder(
-                            itemCount: filtered.length,
-                            itemBuilder: (context, index) {
-                              final item =
-                                  filtered[index].data()
-                                      as Map<String, dynamic>;
-                              return HistoryItemCard(
-                                time: _formatTime(item["createdAt"]),
-                                tag: item["category"] ?? "UNKNOWN",
-                                problem: item["question"] ?? "",
-                                solution: item["solution"] ?? "",
-                                isFinal: true,
-                                itemId: filtered[index].id,
-                              );
-                            },
+                      return ListView.builder(
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final item = filtered[index];
+
+                          return HistoryItemCard(
+                            time: _formatTime(item.createdAt),
+                            tag: item.category,
+                            problem: item.question,
+                            solution: item.solution,
+                            itemId: index.toString(),
                           );
                         },
                       );
@@ -161,6 +111,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ================= SEARCH BAR =================
   Widget _buildSearchBar(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -191,6 +142,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ================= FILTER CHIPS =================
   Widget _buildFilterChips(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -253,11 +205,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-// HISTORY ITEM CARD
+// ================= HISTORY CARD =================
 class HistoryItemCard extends StatelessWidget {
-  final String time, tag, problem, solution;
-  final String itemId;
-  final bool isFinal;
+  final String time, tag, problem, solution, itemId;
 
   const HistoryItemCard({
     super.key,
@@ -265,172 +215,134 @@ class HistoryItemCard extends StatelessWidget {
     required this.tag,
     required this.problem,
     required this.solution,
-    required this.isFinal,
     required this.itemId,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 8.h),
-      padding: EdgeInsets.all(20.r),
+      margin: EdgeInsets.only(bottom: 20.h),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        color: c.card, // white in light, #1E293B in dark
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: c.isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+        color: c.card,
+        borderRadius: BorderRadius.circular(30.r),
+        boxShadow: [
+          BoxShadow(
+            color: c.title.withValues(alpha: 0.02),
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── TIME left + TAG + 3dot right ──────────────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 time,
-                style: TextStyle(color: c.subtitle, fontSize: 11.sp),
+                style: TextStyle(
+                  color: c.subtitle,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // TAG chip — outlined grey in light, cyan-tinted in dark
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 10.w,
                       vertical: 4.h,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: c.isDark
-                            ? c.primary.withValues(alpha: 0.4)
-                            : Colors.grey.withValues(alpha: 0.35),
-                      ),
+                      color: c.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Text(
                       tag,
                       style: TextStyle(
-                        color: c.isDark ? c.primary : c.subtitle,
-                        fontSize: 10.sp,
+                        color: c.primary,
+                        fontSize: 9.sp,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
-                  SizedBox(width: 4.w),
+                  SizedBox(width: 5.w),
                   IconButton(
-                    icon: Icon(Icons.more_vert, color: c.subtitle, size: 18.sp),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: Text(
-                            "More options",
-                            style: TextStyle(color: c.primary),
-                          ),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                leading: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                title: const Text("Delete"),
-                                onTap: () async {
-                                  Navigator.pop(ctx); // close dialog first
-                                  await DatabaseHelper.deleteHistory(
-                                    itemId,
-                                  ); // then delete
-                                },
-                              ),
-                            ],
-                          ),
+                          title: const Text("Delete"),
+                          content: const Text("Delete this history?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.pop(ctx);
+                                await DatabaseHelper.deleteHistory(
+                                  int.parse(itemId),
+                                );
+                              },
+                              child: const Text("Delete"),
+                            ),
+                          ],
                         ),
                       );
                     },
+                    icon: Icon(Icons.more_vert, color: c.subtitle, size: 18.sp),
                   ),
                 ],
               ),
             ],
           ),
-
-          SizedBox(height: 14.h),
-
-          // ── PROBLEM ────────────────────────────────────────────────────
+          SizedBox(height: 12.h),
           Text(
             problem,
             style: TextStyle(
               fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: c.title,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
             ),
           ),
-
-          SizedBox(height: 16.h),
-
-          // ── SOLUTION BOX ───────────────────────────────────────────────
+          SizedBox(height: 15.h),
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(15.r),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
-              // light: #EEF2FF for isFinal, same for !isFinal
-              // dark:  slightly raised surface
-              color: c.surfaceVariant,
-              borderRadius: BorderRadius.circular(12.r),
-              border: !isFinal
-                  ? Border(
-                      left: BorderSide(color: c.primary, width: 4.w),
-                    )
-                  : null,
+              color: c.subtitle.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(18.r),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (isFinal)
-                  CircleAvatar(
-                    backgroundColor: c.primary,
-                    radius: 18.r,
-                    child: Icon(Icons.check, color: Colors.white, size: 16.sp),
-                  ),
-                if (isFinal) SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isFinal ? "FINAL SOLUTION" : "RESULT",
-                        style: TextStyle(
-                          color: c.primary,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                Icon(Icons.check_circle, color: c.primary, size: 28.sp),
+                SizedBox(width: 12.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "FINAL SOLUTION",
+                      style: TextStyle(
+                        color: c.primary,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
-                      SizedBox(height: 3.h),
-                      Text(
-                        solution,
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: c.title,
-                        ),
+                    ),
+                    Text(
+                      solution,
+                      style: TextStyle(
+                        color: c.title,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),

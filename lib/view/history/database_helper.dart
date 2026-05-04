@@ -1,50 +1,34 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
+import 'package:math_ai/models/hive_model.dart';
 
 class DatabaseHelper {
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String boxName = "history_box";
 
-  // ── get current user's history collection ──
-  static CollectionReference _historyCollection() {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    return _firestore.collection("users").doc(uid).collection("history");
+  static Box<HistoryModel> getBox() {
+    return Hive.box<HistoryModel>(boxName);
   }
 
-  static Future<void> saveHistory({
-    required String question,
-    required String solution,
-    required String category,
-    required String type,
-    List<dynamic>? steps,
-  }) async {
-    try {
-      await _historyCollection().add({
-        "question": question,
-        "solution": solution,
-        "category": category,
-        "type": type,
-        "steps": steps ?? [],
-        "searchText": question.toLowerCase(),
-        "createdAt": FieldValue.serverTimestamp(),
-      });
-      print("✅ Saved to Firestore");
-    } catch (e) {
-      print("❌ Firestore Error: $e");
-    }
+  // ================= SAVE =================
+  static Future<void> saveHistory(HistoryModel model) async {
+    final box = getBox();
+    await box.add(model);
   }
 
-  static Stream<QuerySnapshot> getHistory() {
-    return _historyCollection()
-        .orderBy("createdAt", descending: true)
-        .snapshots();
+  // ================= GET ALL =================
+  static List<HistoryModel> getHistory() {
+    final box = getBox();
+    return box.values.toList().reversed.toList();
   }
 
-  static Future<void> deleteHistory(String itemId) async {
-    try {
-      await _historyCollection().doc(itemId).delete();
-      print("✅ Deleted from Firestore");
-    } catch (e) {
-      print("❌ Firestore Error: $e");
-    }
+  // ================= DELETE =================
+  static Future<void> deleteHistory(int index) async {
+    final box = getBox();
+    await box.deleteAt(index);
+  }
+
+  // ================= CLEAR =================
+  static Future<void> clearHistory() async {
+    final box = getBox();
+    await box.clear();
   }
 }

@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (isLoggedIn) {
       Navigator.pushReplacementNamed(context, "/main_screen");
     } else {
-      Navigator.pushReplacementNamed(context, "/login");
+      Navigator.pushReplacementNamed(context, "/startup_screen");
     }
   }
 

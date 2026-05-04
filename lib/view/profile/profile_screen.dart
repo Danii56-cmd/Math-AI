@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
@@ -19,7 +18,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String? userName;
-  String? userEmail;
+  String? userProfession;
   @override
   void initState() {
     super.initState();
@@ -28,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> loadUser() async {
     userName = await AuthServices.getUserName();
-    userEmail = await AuthServices.getUserEmail();
+    userProfession = await AuthServices.getUserProfession();
     setState(() {});
   }
 
@@ -120,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         Text(
-                          userEmail ?? "EMAIL ADDRESS",
+                          userProfession ?? "Profession",
                           style: TextStyle(fontSize: 14, color: c.subtitle),
                         ),
                       ],
@@ -345,13 +344,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Center(
                   child: GestureDetector(
                     onTap: () async {
-                      await AuthServices.logout();
-                      if (!mounted) return;
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        "/login",
-                        (route) => false,
+                      bool? confirm = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("Logout"),
+                          content: Text("Do you really want to logout?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(color: c.title),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text(
+                                "Logout",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
+
+                      if (confirm == true) {
+                        await AuthServices.logout();
+
+                        if (!mounted) return;
+
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          "/startup_screen",
+                          (route) => false,
+                        );
+                      }
                     },
                     child: Container(
                       height: 50.h,
@@ -363,38 +393,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(Icons.logout, color: c.title),
                           SizedBox(width: 5.w),
                           Text("Logout", style: TextStyle(color: c.title)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // ── Delete Account ───────────────────────────────────────────
-                Center(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      height: 50.h,
-                      width: 130.w,
-                      color: Colors.transparent,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.delete_forever_outlined,
-                            color: const Color(
-                              0xFFA83836,
-                            ).withValues(alpha: 0.7),
-                          ),
-                          SizedBox(width: 5.w),
-                          Text(
-                            "Delete Account",
-                            style: TextStyle(
-                              color: const Color(
-                                0xFFA83836,
-                              ).withValues(alpha: 0.7),
-                            ),
-                          ),
                         ],
                       ),
                     ),

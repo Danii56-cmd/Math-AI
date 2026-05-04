@@ -24,82 +24,83 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        backgroundColor: c.bg,
+        body: Consumer<NavigationProvider>(
+          builder: (context, nav, child) {
+            if (nav.selectedIndex == 2) {
+              return SolverScreen(
+                key: ValueKey('${nav.expression}_${nav.capturedImage?.path}'),
+                expression: nav.expression ?? "",
+              );
+            }
+            return _screens[nav.selectedIndex];
+          },
+        ),
 
-    return Scaffold(
-      backgroundColor: c.bg,
-      // ── Consumer only wraps what actually needs to rebuild ──
-      body: Consumer<NavigationProvider>(
-        builder: (context, nav, child) {
-          if (nav.selectedIndex == 2) {
-            return SolverScreen(
-              key: ValueKey('${nav.expression}_${nav.capturedImage?.path}'),
-              expression: nav.expression ?? "",
-            );
-          }
-          return _screens[nav.selectedIndex];
-        },
-      ),
-
-      bottomNavigationBar: Consumer<NavigationProvider>(
-        builder: (context, nav, child) {
-          return Container(
-            margin: EdgeInsets.only(left: 12.w, right: 12.w, bottom: 20.h),
-            height: 65.h,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(30.r),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(20),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(
-                    Theme.of(context).brightness == Brightness.dark ? 10 : 8,
+        bottomNavigationBar: Consumer<NavigationProvider>(
+          builder: (context, nav, child) {
+            return Container(
+              margin: EdgeInsets.only(left: 12.w, right: 12.w, bottom: 10.h),
+              height: 65.h,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(30.r),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(
+                      Theme.of(context).brightness == Brightness.dark ? 10 : 8,
+                    ),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 2),
                   ),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                BottomIcon(
-                  icon: Icons.home_filled,
-                  isSelected: nav.selectedIndex == 0,
-                  onTap: () =>
-                      context.read<NavigationProvider>().changeIndex(0),
-                ),
-                BottomIcon(
-                  icon: Icons.history,
-                  isSelected: nav.selectedIndex == 1,
-                  onTap: () =>
-                      context.read<NavigationProvider>().changeIndex(1),
-                ),
-                BottomIcon(
-                  icon: Icons.smart_toy,
-                  label: "AI Chat",
-                  isSelected: nav.selectedIndex == 2,
-                  onTap: () =>
-                      context.read<NavigationProvider>().changeIndex(2),
-                ),
-                BottomIcon(
-                  icon: Icons.menu_book_rounded,
-                  isSelected: nav.selectedIndex == 3,
-                  onTap: () =>
-                      context.read<NavigationProvider>().changeIndex(3),
-                ),
-                BottomIcon(
-                  icon: Icons.person_outline,
-                  isSelected: nav.selectedIndex == 4,
-                  onTap: () =>
-                      context.read<NavigationProvider>().changeIndex(4),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  BottomIcon(
+                    icon: Icons.home_filled,
+                    isSelected: nav.selectedIndex == 0,
+                    onTap: () =>
+                        context.read<NavigationProvider>().changeIndex(0),
+                  ),
+                  BottomIcon(
+                    icon: Icons.history,
+                    isSelected: nav.selectedIndex == 1,
+                    onTap: () =>
+                        context.read<NavigationProvider>().changeIndex(1),
+                  ),
+                  BottomIcon(
+                    icon: Icons.smart_toy,
+                    label: "AI Chat",
+                    isSelected: nav.selectedIndex == 2,
+                    onTap: () =>
+                        context.read<NavigationProvider>().changeIndex(2),
+                  ),
+                  BottomIcon(
+                    icon: Icons.menu_book_rounded,
+                    isSelected: nav.selectedIndex == 3,
+                    onTap: () =>
+                        context.read<NavigationProvider>().changeIndex(3),
+                  ),
+                  BottomIcon(
+                    icon: Icons.person_outline,
+                    isSelected: nav.selectedIndex == 4,
+                    onTap: () =>
+                        context.read<NavigationProvider>().changeIndex(4),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
