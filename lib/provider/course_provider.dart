@@ -1,5 +1,30 @@
 import 'package:flutter/material.dart';
 
+// ======= RECENT ACTIVITY MODEL =======
+class RecentActivityItem {
+  final IconData icon;
+  final String title;
+  final String category;
+  final DateTime time;
+
+  RecentActivityItem({
+    required this.icon,
+    required this.title,
+    required this.category,
+    required this.time,
+  });
+
+  String get timeAgo {
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 1) return "Just now";
+    if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
+    if (diff.inHours < 24) return "${diff.inHours}h ago";
+    return "${diff.inDays}d ago";
+  }
+
+  String get subtitle => "$timeAgo • $category";
+}
+
 // ======= COURSE MODEL =======
 class CourseModel {
   final String title;
@@ -21,7 +46,7 @@ class CourseModel {
 
 // ======= COURSE PROVIDER =======
 class CourseProvider extends ChangeNotifier {
-  // ======= COURSES DATA — ADD/REMOVE COURSES HERE =======
+  // ======= COURSES DATA =======
   final List<CourseModel> _courses = [
     CourseModel(
       title: "Algebra Foundations",
@@ -90,7 +115,7 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ======= FILTERED COURSES (SEARCH + FILTER) =======
+  // ======= FILTERED COURSES =======
   List<CourseModel> get filteredCourses {
     return _courses.where((course) {
       final matchesSearch =
@@ -105,7 +130,7 @@ class CourseProvider extends ChangeNotifier {
     }).toList();
   }
 
-  // ======= FILTERED TOPICS (for Related Topics section) =======
+  // ======= FILTERED TOPICS =======
   List<String> get filteredTopics {
     final allTopics = _courses
         .where(
@@ -124,7 +149,6 @@ class CourseProvider extends ChangeNotifier {
 
   // ======= SAVED =======
   final Set<String> _savedTopics = {};
-
   Set<String> get savedTopics => _savedTopics;
 
   bool isSaved(String topic) => _savedTopics.contains(topic);
@@ -133,6 +157,27 @@ class CourseProvider extends ChangeNotifier {
     _savedTopics.contains(topic)
         ? _savedTopics.remove(topic)
         : _savedTopics.add(topic);
+    notifyListeners();
+  }
+
+  // ======= RECENT ACTIVITY =======
+  final List<RecentActivityItem> _recentActivity = [];
+
+  List<RecentActivityItem> get recentActivity =>
+      List.unmodifiable(_recentActivity);
+
+  void recordCourseView(CourseModel course) {
+    _recentActivity.removeWhere((item) => item.title == course.title);
+    _recentActivity.insert(
+      0,
+      RecentActivityItem(
+        icon: course.icon,
+        title: course.title,
+        category: course.category,
+        time: DateTime.now(),
+      ),
+    );
+    if (_recentActivity.length > 10) _recentActivity.removeLast();
     notifyListeners();
   }
 }

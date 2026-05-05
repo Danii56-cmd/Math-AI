@@ -42,13 +42,12 @@ class CustomGridViewContainer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
+                  radius: 20.r,
                   backgroundColor:
                       iconbgColor ?? const Color.fromARGB(255, 232, 240, 255),
-                  child: Icon(icon, size: 30, color: iconColor ?? c.primary),
+                  child: Icon(icon, size: 22.sp, color: iconColor ?? c.primary),
                 ),
-
-                SizedBox(height: 3),
-
+                SizedBox(height: 3.h),
                 Text(
                   title,
                   style: TextStyle(fontWeight: FontWeight.bold, color: c.title),

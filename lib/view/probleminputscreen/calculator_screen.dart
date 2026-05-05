@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/calculator_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/view/probleminput_screen.dart/calculator_widget.dart';
+import 'package:math_ai/view/probleminputscreen/calculator_widget.dart';
 import 'package:provider/provider.dart';
 
 class CalculatorScreen extends StatelessWidget {

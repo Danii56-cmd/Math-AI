@@ -6,7 +6,7 @@ import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
-import 'package:math_ai/view/history/database_helper.dart';
+import 'package:math_ai/view/historyscreen/database_helper.dart';
 import 'package:provider/provider.dart';
 
 class SolverScreen extends StatefulWidget {
