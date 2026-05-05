@@ -73,7 +73,7 @@ class CourseProvider extends ChangeNotifier {
       category: "Geometry",
       topics: ["Triangles", "Circles", "Polygons"],
       youtubePlaylistUrl:
-          "https://www.youtube.com/playlist?list=PLDesaqWTN6ETc1ZwHWijCBjBCW_GHAjN",
+          "https://www.youtube.com/playlist?list=PLP0dNb4-MR2LhzKweiu2Y4b4Urrulo72_",
     ),
     CourseModel(
       title: "Statistics",
@@ -82,7 +82,7 @@ class CourseProvider extends ChangeNotifier {
       category: "Statistics",
       topics: ["Mean & Median", "Probability", "Distributions"],
       youtubePlaylistUrl:
-          "https://www.youtube.com/playlist?list=PLDesaqWTN6EQi7FRqCRGMjFDHXgaP7oNR",
+          "https://www.youtube.com/playlist?list=PL5102DFDC6790F3D0",
     ),
     CourseModel(
       title: "Trigonometry",
@@ -91,7 +91,7 @@ class CourseProvider extends ChangeNotifier {
       category: "Trigonometry",
       topics: ["Sin/Cos/Tan", "Unit Circle", "Identities"],
       youtubePlaylistUrl:
-          "https://www.youtube.com/playlist?list=PLDesaqWTN6ESsnqkSQ0WlkFSNiZ0l6Axb",
+          "https://www.youtube.com/playlist?list=PLD6DA74C1DBF770E7",
     ),
   ];
 
