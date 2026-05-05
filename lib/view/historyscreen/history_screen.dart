@@ -23,22 +23,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   String _formatTime(DateTime? date) {
     if (date == null) return "Now";
-
     final hour = date.hour > 12
         ? date.hour - 12
         : date.hour == 0
         ? 12
         : date.hour;
-
     final ampm = date.hour >= 12 ? "PM" : "AM";
-
     return "$hour:${date.minute.toString().padLeft(2, '0')} $ampm";
   }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -62,30 +58,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
         ),
-
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               children: [
                 SizedBox(height: 20.h),
-
                 _buildSearchBar(context, c),
                 SizedBox(height: 20.h),
-
                 _buildFilterChips(context, c),
                 SizedBox(height: 20.h),
-
                 Expanded(
                   child: Consumer<HistoryProvider>(
                     builder: (context, provider, child) {
                       final List<HistoryModel> filtered =
                           provider.filteredHistory;
-
                       if (filtered.isEmpty) {
                         return const Center(child: Text("No history found"));
                       }
-
                       return ListView.builder(
                         itemCount: filtered.length,
                         itemBuilder: (context, index) {
@@ -111,7 +101,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // ================= SEARCH BAR =================
+  // SEARCH BAR
   Widget _buildSearchBar(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -142,7 +132,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // ================= FILTER CHIPS =================
+  // FILTER CHIPS
   Widget _buildFilterChips(BuildContext context, AppColors c) {
     return Consumer<HistoryProvider>(
       builder: (context, provider, child) {
@@ -205,7 +195,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-// ================= HISTORY CARD =================
+// HISTORY CARD
 class HistoryItemCard extends StatelessWidget {
   final String time, tag, problem, solution, itemId;
 
@@ -286,15 +276,16 @@ class HistoryItemCard extends StatelessWidget {
                             TextButton(
                               onPressed: () async {
                                 Navigator.pop(ctx);
-                                await DatabaseHelper.deleteHistory(
+                                final key = DatabaseHelper.getKeyAt(
                                   int.parse(itemId),
                                 );
-
                                 if (context.mounted) {
-                                  Provider.of<HistoryProvider>(
+                                  await Provider.of<HistoryProvider>(
                                     context,
                                     listen: false,
-                                  ).removeHistoryAt(int.parse(itemId));
+                                  ).deleteHistory(
+                                    key,
+                                  ); // single call through provider only
                                 }
                               },
                               child: const Text("Delete"),

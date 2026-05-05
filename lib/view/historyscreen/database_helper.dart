@@ -4,31 +4,34 @@ import 'package:math_ai/models/hive_model.dart';
 class DatabaseHelper {
   static const String boxName = "history_box";
 
-  static Box<HistoryModel> getBox() {
-    return Hive.box<HistoryModel>(boxName);
-  }
+  static Box<HistoryModel> getBox() => Hive.box<HistoryModel>(boxName);
 
-  // ================= SAVE =================
+  // SAVE
   static Future<void> saveHistory(HistoryModel model) async {
-    final box = getBox();
-    await box.add(model);
+    await getBox().add(model);
   }
 
-  // ================= GET ALL =================
+  // GET ALL (reversed, newest first)
   static List<HistoryModel> getHistory() {
     final box = getBox();
     return box.values.toList().reversed.toList();
   }
 
-  // ================= DELETE =================
-  static Future<void> deleteHistory(int index) async {
+  // GET HIVE KEY for a reversed display index
+  // Display index 0 = last inserted = box.length - 1 in actual box
+  static dynamic getKeyAt(int displayIndex) {
     final box = getBox();
-    await box.deleteAt(index);
+    final actualIndex = box.length - 1 - displayIndex;
+    return box.keyAt(actualIndex);
   }
 
-  // ================= CLEAR =================
+  // DELETE by Hive key (not positional index)
+  static Future<void> deleteHistory(dynamic key) async {
+    await getBox().delete(key);
+  }
+
+  // CLEAR
   static Future<void> clearHistory() async {
-    final box = getBox();
-    await box.clear();
+    await getBox().clear();
   }
 }

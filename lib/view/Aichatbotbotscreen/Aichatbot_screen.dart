@@ -6,8 +6,29 @@ import 'package:math_ai/provider/aichat_provider.dart';
 // import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:provider/provider.dart';
 
-class AichatbotScreen extends StatelessWidget {
+class AichatbotScreen extends StatefulWidget {
   const AichatbotScreen({super.key});
+
+  @override
+  State<AichatbotScreen> createState() => _AichatbotScreenState();
+}
+
+class _AichatbotScreenState extends State<AichatbotScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Clear when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AiChatProvider>().clearChat();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clear when screen closes
+    context.read<AiChatProvider>().clearChat();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +37,7 @@ class AichatbotScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: c.surfaceVariant,
       resizeToAvoidBottomInset: true,
-
-      // ── AppBar ────────────────────────────────────────────────────────────
+      // AppBar
       appBar: AppBar(
         backgroundColor: c.surface,
         elevation: 0.7,
@@ -70,23 +90,10 @@ class AichatbotScreen extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.history, color: c.subtitle),
-            onPressed: () => context.read<AiChatProvider>().clearChat(),
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert_rounded, color: c.subtitle),
-            onPressed: () {},
-          ),
-          SizedBox(width: 10.w),
-        ],
       ),
-
-      // ── Body ──────────────────────────────────────────────────────────────
+      //  Body
       body: Column(
         children: [
-          // Only this part rebuilds when messages change
           Expanded(
             child: Consumer<AiChatProvider>(
               builder: (context, chat, _) {
@@ -102,14 +109,13 @@ class AichatbotScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 12.h),
                         Text(
-                          "Ask me anything!",
+                          "Provide me the Maths problems",
                           style: TextStyle(color: c.subtitle, fontSize: 16.sp),
                         ),
                       ],
                     ),
                   );
                 }
-
                 return ListView.builder(
                   controller: chat.scrollController,
                   padding: EdgeInsets.symmetric(
@@ -122,9 +128,7 @@ class AichatbotScreen extends StatelessWidget {
                     if (chat.isTyping && index == chat.messages.length) {
                       return const _TypingIndicator();
                     }
-
                     final msg = chat.messages[index];
-
                     switch (msg.contentType) {
                       case MessageContentType.steps:
                         return StepsContainer(
@@ -146,8 +150,7 @@ class AichatbotScreen extends StatelessWidget {
               },
             ),
           ),
-
-          // Input bar — no Consumer, uses context.read inside callbacks
+          // Input bar
           Container(
             color: c.surfaceVariant,
             child: SafeArea(top: false, child: _InputBar()),
@@ -158,9 +161,7 @@ class AichatbotScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  _TextBubble
-// ─────────────────────────────────────────────────────────────────────────────
+//  TextBubble
 class _TextBubble extends StatelessWidget {
   final String text;
   final bool isUser;
@@ -196,9 +197,7 @@ class _TextBubble extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  _TypingIndicator — three animated bouncing dots
-// ─────────────────────────────────────────────────────────────────────────────
+//  TypingIndicator
 class _TypingIndicator extends StatefulWidget {
   const _TypingIndicator();
 
@@ -215,7 +214,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 1000),
     )..repeat();
   }
 
@@ -269,9 +268,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //  StepsContainer
-// ─────────────────────────────────────────────────────────────────────────────
 class StepsContainer extends StatelessWidget {
   final String steps;
   final String title;
@@ -289,83 +286,86 @@ class StepsContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return Stack(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10.h),
-          padding: EdgeInsets.all(24.r),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: c.surface,
-            borderRadius: BorderRadius.circular(30.r),
-          ),
-          child: Column(
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.h),
+      padding: EdgeInsets.all(24.r),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(30.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Step badge + Title in a row
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: c.primary,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: c.primary,
+                  ),
                 ),
               ),
-              SizedBox(height: 12.h),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: c.subtitle,
-                  height: 1.4,
-                ),
-              ),
-              SizedBox(height: 20.h),
+              SizedBox(width: 10.w),
               Container(
-                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 40.w),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
                 decoration: BoxDecoration(
-                  color: c.surface,
+                  color: c.surfaceVariant,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
-                alignment: Alignment.center,
                 child: Text(
-                  formula,
+                  "STEP ${steps.padLeft(2, '0')}",
                   style: TextStyle(
-                    fontSize: 20.sp,
-                    color: c.primary,
-                    letterSpacing: 1.2,
+                    color: c.subtitle,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11.sp,
                   ),
                 ),
               ),
             ],
           ),
-        ),
-        Positioned(
-          top: 25.h,
-          right: 15.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+
+          SizedBox(height: 12.h),
+
+          // Description
+          Text(
+            description,
+            style: TextStyle(fontSize: 15.sp, color: c.subtitle, height: 1.5),
+          ),
+
+          SizedBox(height: 20.h),
+
+          // Formula
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
             decoration: BoxDecoration(
               color: c.surfaceVariant,
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(16.r),
             ),
+            alignment: Alignment.center,
             child: Text(
-              "STEP ${steps.padLeft(2, '0')}",
+              formula,
               style: TextStyle(
-                color: c.subtitle,
-                fontWeight: FontWeight.bold,
-                fontSize: 11.sp,
+                fontSize: 20.sp,
+                color: c.primary,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  FinalResultCard
-// ─────────────────────────────────────────────────────────────────────────────
+// FinalResultCard
 class FinalResultCard extends StatelessWidget {
   final String formula;
   const FinalResultCard({super.key, required this.formula});
@@ -425,9 +425,7 @@ class FinalResultCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  _InputBar
-// ─────────────────────────────────────────────────────────────────────────────
+//  InputBar
 class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

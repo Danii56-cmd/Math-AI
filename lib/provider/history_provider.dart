@@ -3,7 +3,7 @@ import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/view/historyscreen/database_helper.dart';
 
 class HistoryProvider extends ChangeNotifier {
-  // ================= SEARCH =================
+  // SEARCH
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
 
@@ -12,7 +12,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= FILTER =================
+  // FILTER
   String _selectedFilter = "All History";
   String get selectedFilter => _selectedFilter;
 
@@ -21,33 +21,28 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= GET ALL HISTORY =================
+  //  GET ALL HISTORY
   List<HistoryModel> get historyList => DatabaseHelper.getHistory();
 
-  // ================= ADD HISTORY =================
+  //  ADD HISTORY
   Future<void> addHistory(HistoryModel model) async {
     await DatabaseHelper.saveHistory(model);
-    notifyListeners(); // ← rebuilds UI after adding
-  }
-
-  // ================= DELETE HISTORY =================
-  Future<void> deleteHistory(int index) async {
-    await DatabaseHelper.deleteHistory(index);
-    notifyListeners(); // ← rebuilds UI after deleting
-  }
-
-  void removeHistoryAt(int index) {
-    DatabaseHelper.deleteHistory(index);
     notifyListeners();
   }
 
-  // ================= CLEAR ALL HISTORY =================
+  //  DELETE HISTORY
+  Future<void> deleteHistory(dynamic key) async {
+    await DatabaseHelper.deleteHistory(key);
+    notifyListeners();
+  }
+
+  //  CLEAR ALL HISTORY
   Future<void> clearHistory() async {
     await DatabaseHelper.clearHistory();
     notifyListeners();
   }
 
-  // ================= FILTERED HISTORY =================
+  //  FILTERED HISTORY
   List<HistoryModel> get filteredHistory {
     final query = _searchQuery.toLowerCase();
 
