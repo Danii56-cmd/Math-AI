@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_ai/models/hive_model.dart';
-import 'package:math_ai/view/history/database_helper.dart';
+import 'package:math_ai/view/historyscreen/database_helper.dart';
 
 class HistoryProvider extends ChangeNotifier {
   // ================= SEARCH =================

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/view/courselibrary/courselibrary_screen.dart';
-import 'package:math_ai/view/history/history_screen.dart';
-import 'package:math_ai/view/home/home_screen.dart';
-import 'package:math_ai/view/profile/profile_screen.dart';
-import 'package:math_ai/view/solver/solver_screen.dart';
+import 'package:math_ai/view/courselibraryscreen/courselibrary_screen.dart';
+import 'package:math_ai/view/historyscreen/history_screen.dart';
+import 'package:math_ai/view/homescreen/home_screen.dart';
+import 'package:math_ai/view/profilescreen/profile_screen.dart';
+import 'package:math_ai/view/solverscreen/solver_screen.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatelessWidget {

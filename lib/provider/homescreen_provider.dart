@@ -1,16 +1,5 @@
 import 'package:flutter/material.dart';
-
-class RecentActivityItem {
-  final String icon;
-  final String title;
-  final String subtitle;
-
-  RecentActivityItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-}
+import 'package:math_ai/provider/course_provider.dart';
 
 class HomeProvider extends ChangeNotifier {
   // 🔍 SEARCH
@@ -32,20 +21,27 @@ class HomeProvider extends ChangeNotifier {
   }
 
   // 📋 RECENT ACTIVITY
-  final List<RecentActivityItem> _recentActivity = [
-    RecentActivityItem(
-      icon: "assets/icons/quadratic.png", // replace with AppConstants
-      title: "Quadratic Equation",
-      subtitle: "Solved 2h ago • Algebra",
-    ),
-    RecentActivityItem(
-      icon: "assets/icons/compass.png", // replace with AppConstants
-      title: "Triangle Area",
-      subtitle: "Solved 5h ago • Geometry",
-    ),
-  ];
+  final List<RecentActivityItem> _recentActivity = [];
+  List<RecentActivityItem> get recentActivity =>
+      List.unmodifiable(_recentActivity);
 
-  List<RecentActivityItem> get recentActivity => _recentActivity;
+  void recordCourseView(CourseModel course) {
+    // Remove duplicate if already exists
+    _recentActivity.removeWhere((item) => item.title == course.title);
 
-  // later: add addActivity(), clearHistory(), etc.
+    _recentActivity.insert(
+      0,
+      RecentActivityItem(
+        icon: course.icon,
+        title: course.title,
+        category: course.category,
+        time: DateTime.now(),
+      ),
+    );
+
+    // Keep only the last 10
+    if (_recentActivity.length > 10) _recentActivity.removeLast();
+
+    notifyListeners();
+  }
 }

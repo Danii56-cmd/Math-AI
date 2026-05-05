@@ -4,7 +4,7 @@ import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/view/history/database_helper.dart';
+import 'package:math_ai/view/historyscreen/database_helper.dart';
 import 'package:provider/provider.dart';
 
 class HistoryScreen extends StatefulWidget {

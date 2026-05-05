@@ -11,13 +11,14 @@ import 'package:math_ai/provider/homescreen_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/provider/profile_provider.dart';
 import 'package:math_ai/view/Aichatbotbotscreen/Aichatbot_screen.dart';
-import 'package:math_ai/view/auth/startup_screen.dart';
-import 'package:math_ai/view/history/history_screen.dart';
-import 'package:math_ai/view/probleminput_screen.dart/calculator_screen.dart';
+import 'package:math_ai/view/notificationscreen/notification_screen.dart';
+import 'package:math_ai/view/startupsreen/startup_screen.dart';
+import 'package:math_ai/view/historyscreen/history_screen.dart';
+import 'package:math_ai/view/probleminputscreen/calculator_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:math_ai/shared_widgets/main_screen.dart';
-import 'package:math_ai/view/home/home_screen.dart';
-import 'package:math_ai/view/scanner/camera_screen.dart';
+import 'package:math_ai/view/homescreen/home_screen.dart';
+import 'package:math_ai/view/scannerscreen/camera_screen.dart';
 import 'package:math_ai/view/splashscreen/splash_screen.dart';
 
 void main() async {
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
               "/aichatbot_screen": (context) => const AichatbotScreen(),
               "/calculator_screen": (context) => const CalculatorScreen(),
               "/history_screen": (context) => const HistoryScreen(),
+              "/notification_screen": (context) => const NotificationScreen(),
             },
           );
         },

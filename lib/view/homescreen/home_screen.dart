@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:math_ai/core/app_colors.dart';
-import 'package:math_ai/core/app_constants.dart';
+import 'package:math_ai/provider/course_provider.dart';
 import 'package:math_ai/provider/homescreen_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/view/home/container_slider.dart';
-import 'package:math_ai/view/home/homescreenwidgets/customgridviewcontainer.dart';
-import 'package:math_ai/view/home/homescreenwidgets/customtabbar.dart';
-import 'package:math_ai/view/home/homescreenwidgets/recentactivityListview.dart';
-import 'package:math_ai/view/scanner/camera_screen.dart';
+import 'package:math_ai/view/homescreen/container_slider.dart';
+import 'package:math_ai/view/homescreen/homescreenwidgets/customgridviewcontainer.dart';
+import 'package:math_ai/view/homescreen/homescreenwidgets/customtabbar.dart';
+import 'package:math_ai/view/homescreen/homescreenwidgets/recentactivityListview.dart';
+import 'package:math_ai/view/scannerscreen/camera_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -20,19 +20,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-
-    final List recentActivity = [
-      {
-        "icon": AppConstants.quadraticIcon,
-        "title": "Quadratic Equation",
-        "subtitle": "Solved 2h ago • Algebra",
-      },
-      {
-        "icon": AppConstants.compassIcon,
-        "title": "Triangle Area",
-        "subtitle": "Solved 5h ago • Geometry",
-      },
-    ];
 
     return PopScope(
       canPop: false,
@@ -140,14 +127,17 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           actions: [
-            Icon(Icons.notifications_outlined, color: c.subtitle),
+            IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, "/notification_screen");
+              },
+              icon: Icon(Icons.notifications_outlined, color: c.subtitle),
+            ),
             SizedBox(width: 20.w),
           ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -338,22 +328,38 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 10),
-
+                SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Consumer<HomeProvider>(
-                    builder: (context, provider, child) {
+                  child: Consumer<CourseProvider>(
+                    builder: (context, courseProvider, child) {
+                      final activities = courseProvider.recentActivity;
+
+                      if (activities.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Text(
+                            "No recent activity yet.\nTap a course to get started!",
+                            style: TextStyle(color: c.subtitle, fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
+
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 2,
+                        itemCount: activities.length.clamp(
+                          0,
+                          5,
+                        ), // show max 5 on home
                         itemBuilder: (context, index) {
+                          final item = activities[index];
                           return RecentActivityListview(
-                            icon: recentActivity[index]["icon"],
-                            title: recentActivity[index]["title"],
-                            subtitle: recentActivity[index]["subtitle"],
+                            icon: item.icon, // pass IconData directly
+                            title: item.title,
+                            subtitle:
+                                "${item.timeAgo} • ${item.subtitle.split('• ').last}",
                           );
                         },
                       );

@@ -52,7 +52,6 @@ class CourseLibraryScreen extends StatelessWidget {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
@@ -70,7 +69,7 @@ class CourseLibraryScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20.h),
 
-                  // ======= SEARCH =======
+                  // SEARCH
                   Consumer<CourseProvider>(
                     builder: (context, courseProvider, child) {
                       return TextField(
@@ -169,11 +168,10 @@ class CourseLibraryScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20.h),
 
-                  // ======= DYNAMIC COURSE LIST =======
+                  // DYNAMIC COURSE LIST
                   Consumer<CourseProvider>(
                     builder: (context, provider, child) {
                       final courses = provider.filteredCourses;
-
                       if (courses.isEmpty) {
                         return Center(
                           child: Padding(
@@ -185,7 +183,6 @@ class CourseLibraryScreen extends StatelessWidget {
                           ),
                         );
                       }
-
                       return ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -194,25 +191,19 @@ class CourseLibraryScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final course = courses[index];
 
-                          // Special styled card for Algebra
                           if (course.category == "Algebra") {
                             return AlgebraFoundationContainer(course: course);
                           }
-
-                          // Special styled card for Calculus
                           if (course.category == "Calculus") {
                             return CalculusContainer(course: course);
                           }
-
-                          // Default card for all others
                           return CourseLibraryContainer(course: course);
                         },
                       );
                     },
                   ),
                   SizedBox(height: 20.h),
-
-                  // ======= FEATURED FORMULA SECTION =======
+                  // FEATURED FORMULA SECTION
                   Row(
                     children: [
                       Container(
@@ -454,10 +445,13 @@ Future<void> _openPlaylist(String url) async {
 }
 
 // WATCH PLAYLIST BUTTON
-Widget _watchButton(BuildContext context, String url) {
+Widget _watchButton(BuildContext context, String url, CourseModel course) {
   final c = AppColors.of(context);
   return GestureDetector(
-    onTap: () => _openPlaylist(url),
+    onTap: () async {
+      context.read<CourseProvider>().recordCourseView(course);
+      await _openPlaylist(url);
+    },
     child: Container(
       height: 38.h,
       width: 160.w,
@@ -563,7 +557,7 @@ class CourseLibraryContainer extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: c.subtitle),
             ),
             SizedBox(height: 12.h),
-            _watchButton(context, course.youtubePlaylistUrl),
+            _watchButton(context, course.youtubePlaylistUrl, course),
           ],
         ),
       ),
@@ -645,7 +639,7 @@ class CalculusContainer extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.h),
-            _watchButton(context, course.youtubePlaylistUrl),
+            _watchButton(context, course.youtubePlaylistUrl, course),
           ],
         ),
       ),
@@ -733,7 +727,7 @@ class AlgebraFoundationContainer extends StatelessWidget {
                   .toList(),
             ),
             SizedBox(height: 12.h),
-            _watchButton(context, course.youtubePlaylistUrl),
+            _watchButton(context, course.youtubePlaylistUrl, course),
           ],
         ),
       ),

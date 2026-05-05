@@ -3,9 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 
 class RecentActivityListview extends StatelessWidget {
-  final icon;
-  final title;
-  final subtitle;
+  final IconData icon; // ← typed as IconData
+  final String title;
+  final String subtitle;
+
   const RecentActivityListview({
     super.key,
     required this.icon,
@@ -28,11 +29,13 @@ class RecentActivityListview extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
-
             children: [
-              Image.asset(icon, height: 40.h, width: 40.w),
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: c.surface,
+                child: Icon(icon, color: c.primary, size: 24.sp),
+              ),
               SizedBox(width: 20.w),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +54,7 @@ class RecentActivityListview extends StatelessWidget {
                   ),
                 ],
               ),
-              Spacer(),
+              const Spacer(),
               Icon(Icons.arrow_forward_ios, color: c.subtitle, size: 20.sp),
             ],
           ),
