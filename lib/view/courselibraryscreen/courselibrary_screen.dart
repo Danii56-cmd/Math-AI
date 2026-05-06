@@ -39,16 +39,16 @@ class CourseLibraryScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.share_rounded, color: c.iconColor),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert_rounded, color: c.iconColor),
-              onPressed: () {},
-            ),
-          ],
+          // actions: [
+          //   IconButton(
+          //     icon: Icon(Icons.share_rounded, color: c.iconColor),
+          //     onPressed: () {},
+          //   ),
+          //   IconButton(
+          //     icon: Icon(Icons.more_vert_rounded, color: c.iconColor),
+          //     onPressed: () {},
+          //   ),
+          // ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -100,7 +100,7 @@ class CourseLibraryScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
 
-                  // ======= FILTER =======
+                  // FILTER
                   Consumer<CourseProvider>(
                     builder: (context, provider, child) {
                       return GestureDetector(

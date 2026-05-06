@@ -1,30 +1,50 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:math_ai/main.dart';
+import 'package:math_ai/models/hive_model.dart';
+import 'package:math_ai/provider/theme_provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(() async {
+    await Hive.initFlutter();
+    Hive.registerAdapter(HistoryModelAdapter());
+    await Hive.openBox<HistoryModel>('history_box');
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  tearDownAll(() async {
+    await Hive.close();
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('App launches without crashing', (WidgetTester tester) async {
+    final themeProvider = ThemeChangerProvider();
+    await themeProvider.loadThemeFromPrefs();
+
+    await tester.pumpWidget(MyApp(themeProvider: themeProvider));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
+  });
+
+  test('ThemeChangerProvider defaults to light mode', () async {
+    final themeProvider = ThemeChangerProvider();
+    await themeProvider.loadThemeFromPrefs();
+
+    expect(themeProvider.themeMode, ThemeMode.light);
+  });
+
+  test('ThemeChangerProvider switches to dark mode', () async {
+    final themeProvider = ThemeChangerProvider();
+    await themeProvider.setThemeMode(ThemeMode.dark);
+
+    expect(themeProvider.themeMode, ThemeMode.dark);
+  });
+
+  test('ThemeChangerProvider resets to light on logout', () async {
+    final themeProvider = ThemeChangerProvider();
+    await themeProvider.setThemeMode(ThemeMode.dark);
+    await themeProvider.resetToLight();
+
+    expect(themeProvider.themeMode, ThemeMode.light);
   });
 }

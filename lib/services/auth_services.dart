@@ -5,8 +5,8 @@ class AuthServices {
   static const String _userNameKey = "userName";
   static const String _userProfessionKey = "userProfession";
 
-  // SAVE USER (instead of signup/login)
-  Future<void> saveUser({
+  // SAVE USER
+  static Future<void> saveUser({
     required String name,
     required String profession,
   }) async {
@@ -35,7 +35,7 @@ class AuthServices {
     return prefs.getString(_userProfessionKey);
   }
 
-  // LOGOUT / RESET
+  // LOGOUT
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

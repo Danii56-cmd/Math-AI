@@ -21,6 +21,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
     Provider.of<NavigationProvider>(context, listen: false).changeIndex(0);
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<HistoryProvider>(context, listen: false).loadHistory();
+    });
+  }
+
   String _formatTime(DateTime? date) {
     if (date == null) return "Now";
     final hour = date.hour > 12

@@ -26,7 +26,6 @@ class CustomTabBar extends StatelessWidget {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Row(
         children: List.generate(tabList.length, (index) {

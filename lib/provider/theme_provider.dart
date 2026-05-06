@@ -1,14 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:math_ai/core/app_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeChangerProvider with ChangeNotifier {
-  var _themeMode = ThemeMode.light;
+  static const String _themePrefKey = 'theme_mode';
 
+  ThemeMode _themeMode = ThemeMode.light;
   ThemeMode get themeMode => _themeMode;
 
-  void setThemeMode(ThemeMode themeMode) {
+  /// Call this once at app startup (e.g. in main() before runApp)
+  Future<void> loadThemeFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool(_themePrefKey) ?? false;
+    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+
+  /// Called when the user toggles dark/light mode
+  Future<void> setThemeMode(ThemeMode themeMode) async {
     _themeMode = themeMode;
     notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_themePrefKey, themeMode == ThemeMode.dark);
+  }
+
+  /// Call this on logout to reset to light mode
+  Future<void> resetToLight() async {
+    _themeMode = ThemeMode.light;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_themePrefKey);
   }
 }
 

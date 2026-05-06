@@ -17,7 +17,7 @@ class HistoryModel extends HiveObject {
   final String type;
 
   @HiveField(4)
-  final List<dynamic> steps;
+  final List<String> steps; // ✅ changed from List<dynamic>
 
   @HiveField(5)
   final String searchText;

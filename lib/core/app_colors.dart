@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_ai/core/app_constants.dart';
-import 'package:math_ai/core/theme.dart';
+import 'package:math_ai/provider/theme_provider.dart';
 
 class AppColors {
   AppColors._({

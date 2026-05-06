@@ -4,9 +4,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:math_ai/controllers/math_controller.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/models/hive_model.dart';
+import 'package:math_ai/provider/history_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
 import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
-import 'package:math_ai/view/historyscreen/database_helper.dart';
 import 'package:provider/provider.dart';
 
 class SolverScreen extends StatefulWidget {
@@ -54,7 +54,6 @@ class _SolverScreenState extends State<SolverScreen> {
         result = await MathController.solveFromText(navProvider.expression!);
       } else {
         setState(() {
-          // _errorMessage = "No image or expression provided.";
           _isLoading = false;
         });
         return;
@@ -66,8 +65,7 @@ class _SolverScreenState extends State<SolverScreen> {
       final solution =
           result['final_answer']?.toString() ?? "No answer returned";
 
-      // 🔥 SAVE TO FIRESTORE HERE
-      await DatabaseHelper.saveHistory(
+      await Provider.of<HistoryProvider>(context, listen: false).addHistory(
         HistoryModel(
           question: interpreted,
           solution: solution,
@@ -143,25 +141,25 @@ class _SolverScreenState extends State<SolverScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          actions: [
-            if (_errorMessage.isNotEmpty)
-              IconButton(
-                icon: Icon(Icons.refresh, color: c.iconColor),
-                onPressed: _solve,
-              ),
-            IconButton(
-              icon: Icon(Icons.share_rounded, color: c.iconColor),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert, color: c.iconColor),
-              onPressed: () {},
-            ),
-          ],
+          // actions: [
+          //   if (_errorMessage.isNotEmpty)
+          //     IconButton(
+          //       icon: Icon(Icons.refresh, color: c.iconColor),
+          //       onPressed: _solve,
+          //     ),
+          //   IconButton(
+          //     icon: Icon(Icons.share_rounded, color: c.iconColor),
+          //     onPressed: () {},
+          //   ),
+          //   IconButton(
+          //     icon: Icon(Icons.more_vert, color: c.iconColor),
+          //     onPressed: () {},
+          //   ),
+          // ],
         ),
 
         body: _isLoading
-            // ── Loading ──────────────────────────────────────────────
+            // Loading
             ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -175,7 +173,7 @@ class _SolverScreenState extends State<SolverScreen> {
                   ],
                 ),
               )
-            // ── Error ─────────────────────────────────────────────────
+            //  Error
             : _errorMessage.isNotEmpty
             ? Center(
                 child: Padding(
@@ -200,13 +198,13 @@ class _SolverScreenState extends State<SolverScreen> {
                   ),
                 ),
               )
-            // ── Result ────────────────────────────────────────────────
+            //  Result
             : SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Captured Image ──────────────────────────────
+                    // Captured Image
                     Container(
                       margin: EdgeInsets.symmetric(vertical: 20.h),
                       height: 180.h,
@@ -226,7 +224,7 @@ class _SolverScreenState extends State<SolverScreen> {
                               child: Image.file(imageFile, fit: BoxFit.cover),
                             ),
                     ),
-                    // ── Interpreted Problem ─────────────────────────
+                    // Interpreted Problem
                     if (_interpretedProblem.isNotEmpty) ...[
                       Text(
                         "Interpreted Problem",
@@ -257,7 +255,7 @@ class _SolverScreenState extends State<SolverScreen> {
                         ),
                       ),
                     ],
-                    // ── Steps Header ─────────────────────────────────
+                    // Steps Header
                     Column(
                       children: [
                         SizedBox(height: 10.h),
@@ -293,9 +291,7 @@ class _SolverScreenState extends State<SolverScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: 20.h,
-                        ), // ── Steps List ───────────────────────────────────
+                        SizedBox(height: 20.h), // Steps List
                         if (_steps.isEmpty)
                           Center(
                             child: Text(
@@ -326,7 +322,7 @@ class _SolverScreenState extends State<SolverScreen> {
                             },
                           ),
                         SizedBox(height: 20.h),
-                        // ── Final Answer ─────────────────────────────────
+                        // Final Answer
                         if (_steps.isNotEmpty)
                           Container(
                             margin: EdgeInsets.symmetric(
@@ -407,7 +403,7 @@ class _SolverScreenState extends State<SolverScreen> {
                         ],
                       ),
                     SizedBox(height: 20.h),
-                    // ── Action Buttons ───────────────────────────────
+                    // Action Buttons
                     SolverAIContainer(
                       color: c.surface,
                       text: "Explain More",
@@ -437,7 +433,7 @@ class _SolverScreenState extends State<SolverScreen> {
                       textColor: c.primary,
                       iconColor: c.primary,
                       onTap: () {
-                        // ── FIX: pass fromBottomNav: false so back button pops back here ──
+                        // pass fromBottomNav: false so back button pops back here
                         Provider.of<NavigationProvider>(
                           context,
                           listen: false,
@@ -453,7 +449,7 @@ class _SolverScreenState extends State<SolverScreen> {
   }
 }
 
-// ── Steps Card ────────────────────────────────────────────────────────────────
+// Steps Card
 
 class SolverScreenStepsContainer extends StatelessWidget {
   final int stepNumber;
@@ -590,7 +586,7 @@ class SolverScreenStepsContainer extends StatelessWidget {
   }
 }
 
-// ── Action Button ─────────────────────────────────────────────────────────────
+// Action Button
 
 class SolverAIContainer extends StatelessWidget {
   final String text;

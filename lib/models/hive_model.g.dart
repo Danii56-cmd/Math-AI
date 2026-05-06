@@ -21,7 +21,7 @@ class HistoryModelAdapter extends TypeAdapter<HistoryModel> {
       solution: fields[1] as String,
       category: fields[2] as String,
       type: fields[3] as String,
-      steps: (fields[4] as List).cast<dynamic>(),
+      steps: (fields[4] as List).cast<String>(),
       searchText: fields[5] as String,
       createdAt: fields[6] as DateTime,
     );

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/core/app_constants.dart';
-import 'package:math_ai/core/theme.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
-import 'package:math_ai/provider/profile_provider.dart';
+import 'package:math_ai/provider/theme_provider.dart';
 import 'package:math_ai/services/auth_services.dart';
 import 'package:math_ai/shared_widgets/custom_pop_scope.dart';
 import 'package:provider/provider.dart';
@@ -45,12 +44,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final themeProvider = Provider.of<ThemeChangerProvider>(context);
-    final profileProvider = Provider.of<ProfileProvider>(context);
+
     return CustomPopScope(
       child: Scaffold(
         backgroundColor: c.bg,
         appBar: AppBar(
-          backgroundColor: c.card,
+          backgroundColor: c.bg,
           shadowColor: c.subtitle,
           elevation: 0.7,
           leading: IconButton(
@@ -71,19 +70,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.share_rounded, color: c.primary),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert_rounded, color: c.primary),
-              onPressed: () {},
-            ),
-          ],
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
@@ -91,8 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 40.h),
-
-                // ── Profile Header ───────────────────────────────────────────
+                // Profile Header
                 Row(
                   children: [
                     CircleAvatar(
@@ -110,12 +98,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          userName ?? "Guest User",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: c.title,
+                        SizedBox(
+                          width: 220.w,
+                          child: Text(
+                            userName ?? "Guest User",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: c.title,
+                            ),
                           ),
                         ),
                         Text(
@@ -126,10 +117,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-
-                SizedBox(height: 20.h),
-
-                // ── APPEARANCE Label ─────────────────────────────────────────
+                SizedBox(height: 50.h),
+                // APPEARANCE Label
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Text(
@@ -142,8 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 5.h),
-
-                // ── Appearance Card ──────────────────────────────────────────
+                // Appearance Card
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   decoration: BoxDecoration(
@@ -186,9 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         trailing: Switch(
                           value: c.isDark,
-                          thumbColor: const WidgetStatePropertyAll(
-                            Colors.white,
-                          ),
+                          thumbColor: WidgetStatePropertyAll(c.surface),
                           trackColor: WidgetStateProperty.resolveWith((states) {
                             if (states.contains(WidgetState.selected)) {
                               return AppTheme.primary;
@@ -205,18 +191,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
                       ),
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 10.h),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
-                          backgroundColor: c.iconBgMuted,
+                          backgroundColor: c.iconBg,
                           child: Icon(
-                            Icons.palette_outlined,
-                            color: c.iconMuted,
+                            Icons.play_circle_outline,
+                            color: c.iconColor,
                           ),
                         ),
                         title: Text(
-                          "App Theme",
+                          "Watch Courses Live",
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -224,21 +210,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          "Editorial Sanctuary (Default)",
+                          "Watch Live Courses taught by experts",
                           style: TextStyle(fontSize: 12, color: c.subtitle),
                         ),
                         trailing: Icon(
-                          Icons.keyboard_arrow_right,
+                          Icons.arrow_forward_ios,
                           color: c.subtitle,
                         ),
+                        onTap: () {
+                          Provider.of<NavigationProvider>(
+                            context,
+                            listen: false,
+                          ).changeIndex(3);
+                        },
                       ),
                     ],
                   ),
                 ),
-
                 SizedBox(height: 20.h),
-
-                // ── PREFERENCES Label ────────────────────────────────────────
+                // PREFERENCES Label
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Text(
@@ -251,8 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 5.h),
-
-                // ── Preferences Card ─────────────────────────────────────────
+                // Preferences Card
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   decoration: BoxDecoration(
@@ -276,13 +265,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
                           backgroundColor: c.iconBg,
-                          child: Icon(
-                            Icons.notifications_active_outlined,
-                            color: c.iconColor,
-                          ),
+                          child: Icon(Icons.bar_chart, color: c.iconColor),
                         ),
                         title: Text(
-                          "Notifications",
+                          "Learning Stats",
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -290,112 +276,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          "Daily reminders and AI updates",
-                          style: TextStyle(fontSize: 12, color: c.subtitle),
-                        ),
-                        trailing: Switch(
-                          value: profileProvider.notificationsEnabled,
-                          onChanged: profileProvider.toggleNotifications,
-                          thumbColor: const WidgetStatePropertyAll(
-                            Colors.white,
-                          ),
-                          trackColor: WidgetStateProperty.resolveWith((states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return AppTheme.primary;
-                            }
-                            return c.isDark ? Colors.white24 : Colors.black26;
-                          }),
-                          trackOutlineColor: const WidgetStatePropertyAll(
-                            Colors.transparent,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 5.h),
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: CircleAvatar(
-                          backgroundColor: c.iconBg,
-                          child: Icon(Icons.language, color: c.iconColor),
-                        ),
-                        title: Text(
-                          "Language",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: c.title,
-                          ),
-                        ),
-                        subtitle: Text(
-                          "English (United States)",
+                          "View your solved problems & progress",
                           style: TextStyle(fontSize: 12, color: c.subtitle),
                         ),
                         trailing: Icon(
-                          Icons.keyboard_arrow_down,
+                          Icons.arrow_forward_ios,
                           color: c.subtitle,
+                        ),
+                        onTap: () {
+                          Provider.of<NavigationProvider>(
+                            context,
+                            listen: false,
+                          ).changeIndex(1);
+                        },
+                      ),
+                      SizedBox(height: 10.h),
+                      GestureDetector(
+                        onTap: () async {
+                          bool? confirm = await showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Logout"),
+                              content: Text("Do you really want to logout?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, false);
+                                  },
+                                  child: Text(
+                                    "Cancel",
+                                    style: TextStyle(color: c.title),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text(
+                                    "Logout",
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            await context
+                                .read<ThemeChangerProvider>()
+                                .resetToLight();
+                            await AuthServices.logout();
+                            if (!mounted) return;
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              "/startup_screen",
+                              (route) => false,
+                            );
+                          }
+                        },
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CircleAvatar(
+                            backgroundColor: c.iconBg,
+                            child: Icon(Icons.logout, color: c.iconColor),
+                          ),
+                          title: Text(
+                            "Log Out",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: c.title,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Logout From Current Session",
+                            style: TextStyle(fontSize: 12, color: c.subtitle),
+                          ),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios,
+                            color: c.subtitle,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-
-                SizedBox(height: 5.h),
-
-                // ── Logout ───────────────────────────────────────────────────
-                Center(
-                  child: GestureDetector(
-                    onTap: () async {
-                      bool? confirm = await showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text("Logout"),
-                          content: Text("Do you really want to logout?"),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: Text(
-                                "Cancel",
-                                style: TextStyle(color: c.title),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: Text(
-                                "Logout",
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (confirm == true) {
-                        await AuthServices.logout();
-
-                        if (!mounted) return;
-
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          "/startup_screen",
-                          (route) => false,
-                        );
-                      }
-                    },
-                    child: Container(
-                      height: 50.h,
-                      width: 100.w,
-                      color: Colors.transparent,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.logout, color: c.title),
-                          SizedBox(width: 5.w),
-                          Text("Logout", style: TextStyle(color: c.title)),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
                 SizedBox(height: 20.h),

@@ -7,6 +7,7 @@ import 'package:math_ai/core/app_colors.dart';
 import 'package:math_ai/provider/course_provider.dart';
 import 'package:math_ai/provider/homescreen_provider.dart';
 import 'package:math_ai/provider/navigation_provider.dart';
+import 'package:math_ai/shared_widgets/custom_drawer.dart';
 import 'package:math_ai/view/homescreen/container_slider.dart';
 import 'package:math_ai/view/homescreen/homescreenwidgets/customgridviewcontainer.dart';
 import 'package:math_ai/view/homescreen/homescreenwidgets/customtabbar.dart';
@@ -113,11 +114,19 @@ class HomeScreen extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: c.bg,
+        drawer: const AppDrawer(),
         appBar: AppBar(
           backgroundColor: c.card,
           elevation: 0.7,
           shadowColor: c.subtitle,
-          leading: Icon(Icons.menu, color: c.primary),
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu, color: c.primary),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+          ),
           title: Text(
             "Math Ai",
             style: TextStyle(
@@ -126,59 +135,49 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/notification_screen");
-              },
-              icon: Icon(Icons.notifications_outlined, color: c.subtitle),
-            ),
-            SizedBox(width: 20.w),
-          ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20.h),
+                // SizedBox(height: 20.h),
 
-                // ── Search Bar ───────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: Consumer<HomeProvider>(
-                    builder: (context, provider, child) {
-                      return TextField(
-                        style: TextStyle(color: c.title),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: c.card,
-                          prefixIcon: Icon(Icons.search, color: c.subtitle),
-                          hintText: "Search math problems...",
-                          hintStyle: TextStyle(color: c.subtitle),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: c.border),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
-                              color: c.primary.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ),
-                        onChanged: (value) =>
-                            context.read<HomeProvider>().updateSearch(value),
-                      );
-                    },
-                  ),
-                ),
-
+                // // Search Bar
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 25),
+                //   child: Consumer<HomeProvider>(
+                //     builder: (context, provider, child) {
+                //       return TextField(
+                //         style: TextStyle(color: c.title),
+                //         decoration: InputDecoration(
+                //           filled: true,
+                //           fillColor: c.card,
+                //           prefixIcon: Icon(Icons.search, color: c.subtitle),
+                //           hintText: "Search math problems...",
+                //           hintStyle: TextStyle(color: c.subtitle),
+                //           enabledBorder: OutlineInputBorder(
+                //             borderRadius: BorderRadius.circular(30),
+                //             borderSide: BorderSide(color: c.border),
+                //           ),
+                //           focusedBorder: OutlineInputBorder(
+                //             borderRadius: BorderRadius.circular(30),
+                //             borderSide: BorderSide(
+                //               color: c.primary.withValues(alpha: 0.5),
+                //             ),
+                //           ),
+                //         ),
+                //         onChanged: (value) =>
+                //             context.read<HomeProvider>().updateSearch(value),
+                //       );
+                //     },
+                //   ),
+                // ),
                 SizedBox(height: 25.h),
                 const ContainerSlider(),
                 SizedBox(height: 20.h),
 
-                // ── Tab Bar ──────────────────────────────────────────────────
+                // Tab Bar
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: SizedBox(
@@ -197,7 +196,7 @@ class HomeScreen extends StatelessWidget {
 
                 SizedBox(height: 10.h),
 
-                // ── View All ─────────────────────────────────────────────────
+                // View All
                 GestureDetector(
                   onTap: () {
                     Provider.of<NavigationProvider>(
@@ -228,7 +227,7 @@ class HomeScreen extends StatelessWidget {
 
                 SizedBox(height: 10.h),
 
-                // ── Start Solving ────────────────────────────────────────────
+                // Start Solving
                 Padding(
                   padding: const EdgeInsets.only(left: 20),
                   child: Text(
@@ -243,7 +242,7 @@ class HomeScreen extends StatelessWidget {
 
                 SizedBox(height: 10.h),
 
-                // ── Grid ─────────────────────────────────────────────────────
+                // Grid
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: GridView.count(
@@ -293,7 +292,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       CustomGridViewContainer(
                         icon: Icons.keyboard_alt_outlined,
-                        iconColor: c.subtitle,
+                        iconColor: c.iconColor,
                         title: "Type Problem",
                         subtitle: "Enter expression",
                         onTap: () {

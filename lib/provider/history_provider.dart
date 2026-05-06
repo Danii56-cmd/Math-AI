@@ -3,50 +3,57 @@ import 'package:math_ai/models/hive_model.dart';
 import 'package:math_ai/view/historyscreen/database_helper.dart';
 
 class HistoryProvider extends ChangeNotifier {
-  // SEARCH
+  List<HistoryModel> _history = [];
+
+  List<HistoryModel> get historyList => _history;
+
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
 
+  String _selectedFilter = "All History";
+  String get selectedFilter => _selectedFilter;
+
+  // INIT LOAD
+  Future<void> loadHistory() async {
+    _history = DatabaseHelper.getHistory();
+    notifyListeners();
+  }
+
+  // ADD
+  Future<void> addHistory(HistoryModel model) async {
+    await DatabaseHelper.saveHistory(model);
+    await loadHistory(); // 🔥 important
+  }
+
+  // DELETE
+  Future<void> deleteHistory(dynamic key) async {
+    await DatabaseHelper.deleteHistory(key);
+    await loadHistory(); // 🔥 important
+  }
+
+  // CLEAR
+  Future<void> clearHistory() async {
+    await DatabaseHelper.clearHistory();
+    await loadHistory(); // 🔥 important
+  }
+
+  // SEARCH
   void updateSearch(String value) {
     _searchQuery = value;
     notifyListeners();
   }
 
   // FILTER
-  String _selectedFilter = "All History";
-  String get selectedFilter => _selectedFilter;
-
   void changeFilter(String value) {
     _selectedFilter = value;
     notifyListeners();
   }
 
-  //  GET ALL HISTORY
-  List<HistoryModel> get historyList => DatabaseHelper.getHistory();
-
-  //  ADD HISTORY
-  Future<void> addHistory(HistoryModel model) async {
-    await DatabaseHelper.saveHistory(model);
-    notifyListeners();
-  }
-
-  //  DELETE HISTORY
-  Future<void> deleteHistory(dynamic key) async {
-    await DatabaseHelper.deleteHistory(key);
-    notifyListeners();
-  }
-
-  //  CLEAR ALL HISTORY
-  Future<void> clearHistory() async {
-    await DatabaseHelper.clearHistory();
-    notifyListeners();
-  }
-
-  //  FILTERED HISTORY
+  // FILTERED DATA
   List<HistoryModel> get filteredHistory {
     final query = _searchQuery.toLowerCase();
 
-    return historyList.where((item) {
+    return _history.where((item) {
       final categoryMatch =
           _selectedFilter == "All History" || item.category == _selectedFilter;
 
